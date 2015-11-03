@@ -1,0 +1,6 @@
+[submodule "nromgen"]
+	path = nromgen
+	url = https://github.com/natsutan/nromgen
+[submodule "module/nromgen"]
+	path = module/nromgen
+	url = https://github.com/natsutan/nromgen
