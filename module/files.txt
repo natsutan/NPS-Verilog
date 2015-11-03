@@ -1,1 +1,2 @@
-
+nromgen:ROMジェネレータ
+n_in_mem:入力メモリ

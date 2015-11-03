@@ -100,6 +100,15 @@ if __name__ == "__main__":
     y_train_3 = np.abs(x_train)
     y_train_4 = heaviside(x_train)
 
+    fp_xtrain = open("xtrain.dat", "w")
+    fp_xtrain_1 = open("xtrain_1.dat", "w")
+    for x in x_train:
+        fp_xtrain.write("%f\n" % x)
+    for x in y_train_1:
+        fp_xtrain_1.write("%f\n" % x)
+    fp_xtrain.close()
+    fp_xtrain_1.close()
+
     W1_1, W2_1= NN(x_train, y_train_1, n_imput, n_hidden, n_output, eta, W1, W2, n_loop) 
     # W1_2, W2_2= NN(x_train, y_train_2, n_imput, n_hidden, n_output, eta, W1, W2, n_loop)
     # W1_3, W2_3= NN(x_train, y_train_3, n_imput, n_hidden, n_output, eta, W1, W2, n_loop)
