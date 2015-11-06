@@ -1,2 +1,5 @@
 nromgen:ROMジェネレータ
-n_in_mem:入力メモリ
+NPS-inmem:入力メモリ
+NPS-rom:rom
+NPS-outmem:出力メモリ
+

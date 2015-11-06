@@ -5,5 +5,18 @@ npsv.scmのファイルを分ける？
 固定小数点数関係
 Verilog出力関係
 
+(connect rom_a ram_b)
+(connect rom_b :port out2 func_a ;port in1)
+(connect func_c (connect rom_b rom_c))
+
+*wire* (
+	('wire00 (roma inp1) (romb inp2) (romc out2)
+	)
+
+*instance* (roma romb romc)
+
+
+
+
 
 
