@@ -1,5 +1,5 @@
-
-
+(use srfi-19)
+(use file.util)
 
 (define-class <npsv-fixed> ()
   ((W :init-keyword :W) ; Whole bit width
@@ -28,11 +28,21 @@
    (comment :init-keyword :comment :init-value "")
    (function)))
 
+;;;--------------------------------------------------------------------------------
+;;; file
+;;;--------------------------------------------------------------------------------
+(define load-setting-file
+  (lambda (fname)
+    (format #t "load ~A" fname)
+    (load fname)))
 
 
 
-
-
+;;misc
+(define usage-exit
+  (lambda (program-name)
+    (format #t "Usage: gosh ~A setting-file~%" program-name)
+    (exit 1)))
 
 
 
