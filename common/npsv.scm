@@ -24,9 +24,24 @@
 
 (define-class <npsv-module> ()
   ((name :init-keyword :name)
-   (ports)
+   (ports :init-value '())
    (comment :init-keyword :comment :init-value "")
    (function)))
+
+
+(define-method initialize ((self <npsv-module>) initargs)
+  (next-method)
+  (let ((clk (make <npsv-port> :name "clk" :dir 'input :spetial #t))
+	(reset_x (make <npsv-port> :name "reset_x" :dir 'input :spetial #t)))
+    (add-port self clk)
+    (add-port self reset_x)))
+
+(define-method add-port ((inst <npsv-module>) (port <npsv-port>))
+  (set! (ref inst 'ports) (cons port (ref inst 'ports))))
+    
+
+(define-method print ((inst <npsv-module>))
+  (print "ngato"))
 
 ;;;--------------------------------------------------------------------------------
 ;;; file
