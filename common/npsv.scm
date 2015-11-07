@@ -1,4 +1,5 @@
 (use srfi-19)
+(use srfi-13)
 (use file.util)
 
 (define-class <npsv-fixed> ()
@@ -24,6 +25,7 @@
 
 (define-class <npsv-module> ()
   ((name :init-keyword :name)
+   (type :init-keyword :type)
    (ports :init-value '())
    (comment :init-keyword :comment :init-value "")
    (function)))
@@ -41,7 +43,20 @@
     
 
 (define-method print ((inst <npsv-module>))
-  (print "ngato"))
+  (print (string-concatenate  (list "<npsv-module> " (ref inst 'name) " (" (symbol->string (ref inst 'type)) ")" )))
+  ;(next-method)
+  )
+
+
+(define print-instance
+  (lambda (inst)
+    (print inst)
+    (print (string-concatenate (list "\"" (ref inst 'comment) "\"")))
+    (dolist (p (ref inst 'ports))
+            (let ((s (string-concatenate
+                      (list "Port:" (ref p 'name) " (" (symbol->string (ref p 'dir)) ")"))))
+              (print s)))))
+
 
 ;;;--------------------------------------------------------------------------------
 ;;; file

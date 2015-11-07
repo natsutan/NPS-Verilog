@@ -16,6 +16,14 @@ Verilog出力関係
 *instance* (roma romb romc)
 
 
+標準のポート
+
+clk
+reset_x
+
+set, start
+di, do, vi, vo, fi, fo
+
 
 
 

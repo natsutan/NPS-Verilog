@@ -19,7 +19,11 @@
 
 (define make-instance
   (lambda (name data-num init-file W I delta)
-    (let ((inst (make <npsv-module> :name name :comment "input memory module")))
+    (let ((inst (make <npsv-module> :name name :type 'NPS-inmem :comment "input memory module")))
+      (add-port inst (make <npsv-port> :name "start" :dir 'input))
+      (add-port inst (make <npsv-port> :name "set" :dir 'input))
+      (add-port inst (make <npsv-port> :name "set" :dir 'input))
+      (add-port inst (make <npsv-port> :name "fo" :dir 'output))
       inst)))
 
            
@@ -39,8 +43,7 @@
                     *npsv-init-file*
                     *npsv-W* *npsv-I*
                     *npsv-delta-T*))
-  (print *instance*)
-  
+  (print-instance *instance*)
   )
 
 
