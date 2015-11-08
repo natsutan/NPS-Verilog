@@ -4,6 +4,14 @@
 
 (define *instance* '())
 
+(define rtl-template
+  "
+
+
+  "
+  )
+
+
 (define print-setting
   (lambda ()
     (format #t "module name ~A~%" *npsv-module-name*)
@@ -33,7 +41,36 @@
                     :lsb 0
                     :fixed-info fixed
                     :type 'reg)))
+      ;; reg
+      (add-reg inst (make <npsv-2dmem> :name "mem" :adr-w (datanum->adr-w data-num) :msb (- W 1) :lsb 0))
+      (add-reg inst (make <npsv-reg> :name "en"))
+      (add-reg inst (make <npsv-reg> :name "delta_cnt_en"))
+      (add-reg inst (make <npsv-reg> :name "delta_cnt" :msb (datanum->adr-w (+ delta 1)) :lsb 0))
+      (add-reg inst (make <npsv-reg> :name "adr_cnt" :msb (datanum->adr-w (+ delta 1)) :lsb 0))
+      
+      ;; process
+      (add-process inst (make <npsv-process>
+                          :reset "en <= 0;"
+                          :process (format #f "\t\t\tif(delta_cnt == ~A)begin~%\t\t\t\ten <= 1;~%\t\t\tend~%\t\tend" delta)))
+      (add-process inst (make <npsv-process>
+                          :reset "cnt_en <= 0;"
+                          :process (format #f "\t\t\tif(start)begin~%\t\t\t\tcnt_en <= 1;~%\t\t\tend else if(delta_cnt == ~A)begin~%\t\t\t\t\cnt_en <= 0;~%\t\t\tend~%\t\tend" delta)))
+      (add-process inst (make <npsv-process>
+                          :reset "delta_cnt <= 0;"                 
+                          :process (format #f "\t\t\tif(cnt_en)begin~%\t\t\t\tdelta_cnt <= delta_cnt + 1;~%\t\t\tend~%\t\tend")))
+      (add-process inst (make <npsv-process>
+                          :reset "adr_cnt <= 0;"
+                          :process (string-append (format #f "\t\t\tif(adr_cnt == ~A)begin~%" data-num)
+                                                  "\t\t\t\tadr_cnt <= adr_cnt;\n"
+                                                  "\t\t\tend else if(en)begin\n"
+                                                  "\t\t\t\tadr_cnt <= adr_cnt + 1;\n"
+                                                  "\t\t\tend\n"
+                                                  "\t\tend")))
+      
+
       inst)))
+
+
 
 
 ;;; --------------------------------------------------------------------------------
