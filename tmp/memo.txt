@@ -22,7 +22,7 @@ clk
 reset_x
 
 set, start
-di, do, vi, vo, fi, fo
+datai, datao, vi, vo, fi, fo
 
 
 
