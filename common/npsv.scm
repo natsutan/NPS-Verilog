@@ -42,7 +42,6 @@
     (assign :init-keyword :assign)))
 
    
-
 (define-method initialize ((self <npsv-module>) initargs)
   (next-method)
   (let ((clk (make <npsv-port> :name "clk" :dir 'input :spetial #t))
@@ -51,7 +50,7 @@
     (add-port self reset_x)))
 
 (define-method add-port ((inst <npsv-module>) (port <npsv-port>))
-  (set! (ref inst 'ports) (cons port (ref inst 'ports))))
+  (set! (ref inst 'ports) (append (ref inst 'ports) (cons port '()))))
     
 (define-method add-process ((inst <npsv-module>) (process <npsv-process>))
   (set! (ref inst 'processes) (cons process (ref inst 'processes))))
@@ -116,19 +115,46 @@
         ""
         (string-append "// " comment))))
 
-
 (define write-cr
   (lambda (fp)
     (format fp "~%")))
 
 (define write-verilog-file
   (lambda (inst dir text)
-    (let* ((name (ref inst 'name))
-           (fp (open-verilog-file dir name)))
+    (let* ([name (ref inst 'name)]
+           [fp (open-verilog-file dir name)])
       (write-header fp name)
       (format fp text)
       (close-verilog-file fp))))
 
+(define write-verilog-testbench-file
+  (lambda (inst dir text)
+    (let* ([name (ref inst 'name)]
+           [fp (open-verilog-file dir (string-append name "_tb"))])
+      (write-header fp name)
+      (format fp text)
+      (close-verilog-file fp))))
+
+
+(define write-template-ports
+  (lambda (fp ports)
+    (let ([name (ref (car ports) 'name)])
+      (if (= (length ports) 1)
+          (format fp "\t\t~A()~%" name)  ;; no camma
+          (begin
+            (format fp "\t\t~A(),~%" name)
+            (write-template-ports fp (cdr ports)))))))
+
+(define write-template
+  (lambda (inst dir)
+    (let* ([name (ref inst 'name)]
+           [fp (open-verilog-file dir (string-append name "_template"))])
+      (write-header fp name)
+      (write-cr fp)
+      (format fp "\t~A ~A (~%" name name)
+      (write-template-ports fp (ref inst 'ports))
+      (format fp "\t);~%")
+      (close-verilog-file fp))))
 
 ;;;--------------------------------------------------------------------------------
 ;;; file
@@ -165,3 +191,5 @@
 (define datanum->adr-w
   (lambda (datanum)
     (ceiling (log datanum 2))))
+
+
