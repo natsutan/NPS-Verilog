@@ -55,10 +55,7 @@
     
 (define-method add-process ((inst <npsv-module>) (process <npsv-process>))
   (set! (ref inst 'processes) (cons process (ref inst 'processes))))
-  
-(define-method add-reg ((inst <npsv-module>) (reg <npsv-reg>))
-  (set! (ref inst 'registers) (cons reg (ref inst 'registers))))
-  
+    
 (define-method add-wire ((inst <npsv-module>) (process <npsv-wire>))
   (set! (ref inst 'wires) (cons processes (ref inst 'wires))))
 
@@ -125,10 +122,11 @@
     (format fp "~%")))
 
 (define write-verilog-file
-  (lambda (inst dir)
+  (lambda (inst dir text)
     (let* ((name (ref inst 'name))
            (fp (open-verilog-file dir name)))
       (write-header fp name)
+      (format fp text)
       (close-verilog-file fp))))
 
 
