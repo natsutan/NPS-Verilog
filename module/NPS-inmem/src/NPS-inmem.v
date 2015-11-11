@@ -13,8 +13,7 @@ module NPS_inmem # (parameter DATA_WIDTH = 16, DATA_NUM = 30, DELTA_T = 20, ADR_
  input [ADR_WIDTH-1:0] 	     cpu_adr,
  input [DATA_WIDTH-1:0]      cpu_data,
  input 			     cpu_wr			     
- 
- 
+  
 );
   reg [ADR_WIDTH:0] 	     adr_cnt;
   reg [DELTA_WIDTH:0] 	     delta_cnt;
@@ -55,7 +54,6 @@ module NPS_inmem # (parameter DATA_WIDTH = 16, DATA_NUM = 30, DELTA_T = 20, ADR_
   
   always @ (posedge clk or negedge reset_x) begin
     if(reset_x == 0)begin
-//      delta_cnt <= DELTA_WIDTH'd0;
       delta_cnt <= 0;
     end else begin
       if(delta_cnt == DELTA_T)begin

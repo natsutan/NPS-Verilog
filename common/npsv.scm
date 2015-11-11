@@ -119,7 +119,7 @@
   (lambda (fp)
     (format fp "~%")))
 
-(define write-verilog-file
+(define make-verilog-file
   (lambda (inst dir text)
     (let* ([name (ref inst 'name)]
            [fp (open-verilog-file dir name)])
@@ -127,7 +127,7 @@
       (format fp text)
       (close-verilog-file fp))))
 
-(define write-verilog-testbench-file
+(define make-verilog-testbench-file
   (lambda (inst dir text)
     (let* ([name (ref inst 'name)]
            [fp (open-verilog-file dir (string-append name "_tb"))])
@@ -145,7 +145,7 @@
             (format fp "\t\t~A(),~%" name)
             (write-template-ports fp (cdr ports)))))))
 
-(define write-template
+(define make-template
   (lambda (inst dir)
     (let* ([name (ref inst 'name)]
            [fp (open-verilog-file dir (string-append name "_template"))])
@@ -155,6 +155,49 @@
       (write-template-ports fp (ref inst 'ports))
       (format fp "\t);~%")
       (close-verilog-file fp))))
+
+(define read-write-initialize-file
+  (lambda (fpi fpo W I adr)
+    (let ((buf (read-line fpi)))
+      (when (not (eof-object? buf))
+        (let ((n (string->number buf)))
+          (when n              
+            (let ((s (toFix n W I)))
+              (format fpo "\tcpu_write(~A,~A);  // ~A~%" adr s buf)
+              (read-write-initialize-file fpi fpo W I (+ adr 1)))))))))
+
+(define write-initialize-file-header
+  (lambda (fp name W I )
+    (write-header fp name)
+    (format fp "// W = ~A, I = ~A~%" W I)))
+
+
+(define make-initialize-file
+  (lambda (inst initfilename odir W I)
+    (let* ([name (ref inst 'name)]
+           [fpi (open-input-file initfilename) ]
+           [fpo (open-verilog-file odir (string-append name "_init"))])
+      (format #f "open ~A~%" initfilename)
+      (write-initialize-file-header fpo name W I)
+      (read-write-initialize-file fpi fpo W I 0)
+      (close-verilog-file fpo)
+      (close-input-port fpi)
+      )))
+
+(define quantize
+  (lambda (x)
+    (if (< x 0)
+        (- x 1)
+        x)))
+
+(define toFix
+  (lambda (x W I)
+    (let ((val (* x (power 2 (- W I 1))))
+          (max (- (power 2 (- W 1)) 1))
+          (min (- (power 2 (- W 1)))))
+      (let ((val_int (exact (values-ref (modf val) 1))))
+        (clamp  (quantize val_int)  min  max)))))
+
 
 ;;;--------------------------------------------------------------------------------
 ;;; file

@@ -57,11 +57,12 @@
                     *npsv-W* *npsv-I*
                     *npsv-delta-T*))
   ;(print-instance *instance*)
-  (write-verilog-file *instance* *npsv-rtl-output-dir*
+  (make-verilog-file *instance* *npsv-rtl-output-dir*
                       (eval rtl-template (interaction-environment)))
-  (write-template *instance* *npsv-template-output-dir*)
+  (make-template *instance* *npsv-template-output-dir*)
 ;  (set! *tb_name* (string-append *npsv-module-name* "_tb" ))
-  (write-verilog-testbench-file *instance* *npsv-testbench-output-dir*
+  (make-initialize-file *instance* *npsv-init-file* *npsv-testbench-output-dir* *npsv-W* *npsv-I*)
+  (make-verilog-testbench-file *instance* *npsv-testbench-output-dir*
                                 (eval testbench-template (interaction-environment))))
 
 
