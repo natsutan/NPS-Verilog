@@ -7,7 +7,7 @@
 (define *npsv-delta-T* 2)    ; integer word length
 
 (define *npsv-module-name* "sample")
-(define *npsv-init-file* "../sample/xsample.dat")
+(define *npsv-init-file* "../sample/sample.dat")
 (define *npsv-rtl-output-dir* "../output/rtl")
 (define *npsv-testbench-output-dir* "../output/tb")
 (define *npsv-template-output-dir* "../output/template")

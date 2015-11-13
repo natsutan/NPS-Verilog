@@ -156,33 +156,6 @@
       (format fp "\t);~%")
       (close-verilog-file fp))))
 
-(define read-write-initialize-file
-  (lambda (fpi fpo W I adr)
-    (let ((buf (read-line fpi)))
-      (when (not (eof-object? buf))
-        (let ((n (string->number buf)))
-          (when n              
-            (let ((s (toFix n W I)))
-              (format fpo "\tcpu_write(~A,~A);  // ~A~%" adr s buf)
-              (read-write-initialize-file fpi fpo W I (+ adr 1)))))))))
-
-(define write-initialize-file-header
-  (lambda (fp name W I )
-    (write-header fp name)
-    (format fp "// W = ~A, I = ~A~%" W I)))
-
-
-(define make-initialize-file
-  (lambda (inst initfilename odir W I)
-    (let* ([name (ref inst 'name)]
-           [fpi (open-input-file initfilename) ]
-           [fpo (open-verilog-file odir (string-append name "_init"))])
-      (format #f "open ~A~%" initfilename)
-      (write-initialize-file-header fpo name W I)
-      (read-write-initialize-file fpi fpo W I 0)
-      (close-verilog-file fpo)
-      (close-input-port fpi)
-      )))
 
 (define quantize
   (lambda (x)

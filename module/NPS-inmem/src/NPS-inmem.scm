@@ -41,6 +41,34 @@
       
       inst)))
 
+(define read-write-initialize-file
+  (lambda (fpi fpo W I adr)
+    (let ((buf (read-line fpi)))
+      (when (not (eof-object? buf))
+        (let ((n (string->number buf)))
+          (when n              
+            (let ((s (toFix n W I)))
+              (format fpo "\tcpu_wr_task(~A,~A);  // ~A~%" adr s buf)
+              (read-write-initialize-file fpi fpo W I (+ adr 1)))))))))
+
+(define write-initialize-file-header
+  (lambda (fp name W I )
+    (write-header fp name)
+    (format fp "// W = ~A, I = ~A~%" W I)))
+
+
+(define make-initialize-file
+  (lambda (inst initfilename odir W I)
+    (let* ([name (ref inst 'name)]
+           [fpi (open-input-file initfilename) ]
+           [fpo (open-verilog-file odir (string-append name "_init"))])
+      (format #f "open ~A~%" initfilename)
+      (write-initialize-file-header fpo name W I)
+      (read-write-initialize-file fpi fpo W I 0)
+      (close-verilog-file fpo)
+      (close-input-port fpi)
+      )))
+
 ;;; --------------------------------------------------------------------------------
 ;;; main
 ;;; --------------------------------------------------------------------------------
@@ -209,15 +237,13 @@ module ~|*npsv-module-name*|_tb();
   reg [DATA_WIDTH-1:0] cpu_data;
   reg 		       cpu_wr;			     
 
-  integer 	       i;
-  
   parameter PERIOD = 10.0;
   always # (PERIOD/2) clk = !clk;
   initial begin 
     clk = 1;
   end
   
-  NPS_inmem U0
+  ~*npsv-module-name* U0
     (
      .clk(clk),
      .reset_x(reset_x),
@@ -231,20 +257,28 @@ module ~|*npsv-module-name*|_tb();
      .cpu_wr(cpu_wr)
      );
 
+  task cpu_wr_task;
+    input [ADR_WIDTH-1:0] adr;
+    input [DATA_WIDTH-1:0] data;
+    begin
+       @(posedge clk);
+       cpu_wr = 1;
+       cpu_adr = adr;
+       cpu_data = data;
+       @(posedge clk);
+       cpu_wr = 0;
+       @(posedge clk);
+    end
+  endtask
+
 
   initial begin
 
     #1 reset_x = 1; cpu_adr = 0; cpu_wr = 0; set = 0; start = 0; cpu_data = 0;
     # (PERIOD * 3)  reset_x = 0;
     # (PERIOD * 5)  reset_x = 1;
-    for(i=0;i<DATA_NUM;i=i+1)begin
-      # (PERIOD)
-      cpu_adr = i;
-      cpu_data = i;
-      cpu_wr = 1;
-    end
-    # (PERIOD)
-    cpu_wr = 0;
+
+    `include \"~|*npsv-module-name*|_init.v\"
 
     # (PERIOD * 3) set = 1;
     # (PERIOD) set = 0;
@@ -257,7 +291,6 @@ module ~|*npsv-module-name*|_tb();
   end
 
 endmodule // NPS
-
-
   "
   )
+
