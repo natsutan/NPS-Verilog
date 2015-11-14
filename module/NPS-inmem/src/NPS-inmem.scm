@@ -36,8 +36,6 @@
       (add-port inst (make <npsv-port> :name "cpu_adr" :dir 'input :lsb 0 :msb (- adr_w 1)))
       (add-port inst (make <npsv-port> :name "cpu_data" :dir 'input :lsb 0 :msb (- W 1)))
       (add-port inst (make <npsv-port> :name "cpu_wr" :dir 'input))
-      
-      
       inst)))
 
 (define read-write-initialize-file
