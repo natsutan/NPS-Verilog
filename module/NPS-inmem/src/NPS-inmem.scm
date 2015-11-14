@@ -3,7 +3,6 @@
 (require "npsv")
 
 (define *instance* '())
-(define *tb_name* "")
 
 (define print-setting
   (lambda ()
@@ -88,17 +87,14 @@
   (make-verilog-file *instance* *npsv-rtl-output-dir*
                       (eval rtl-template (interaction-environment)))
   (make-template *instance* *npsv-template-output-dir*)
-;  (set! *tb_name* (string-append *npsv-module-name* "_tb" ))
   (make-initialize-file *instance* *npsv-init-file* *npsv-testbench-output-dir* *npsv-W* *npsv-I*)
   (make-verilog-testbench-file *instance* *npsv-testbench-output-dir*
                                 (eval testbench-template (interaction-environment))))
 
 
-
-
-;;;
+;;; --------------------------------------------------------------------------------
 ;;; verilog source
-;;;
+;;; --------------------------------------------------------------------------------
 (define rtl-template
   '#"module ~*npsv-module-name* # (parameter DATA_WIDTH = ~*npsv-W* , DATA_NUM = ~*npsv-data-num*, DELTA_T = ~*npsv-delta-T* , ADR_WIDTH = ~(datanum->adr-w *npsv-data-num*), DELTA_WIDTH = ~(datanum->adr-w *npsv-delta-T*) )
 (
