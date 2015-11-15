@@ -207,6 +207,6 @@
 
 (define datanum->adr-w
   (lambda (datanum)
-    (ceiling (log datanum 2))))
+    (ceiling->exact (log datanum 2))))
 
 
