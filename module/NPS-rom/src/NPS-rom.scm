@@ -105,30 +105,16 @@
                  *npsv-W*
                  *npsv-I*))
   (print-instance *instance*)
-  (set! *data* (make-data *nr-func*
-                 *nr-min*
-                 *nr-max*
-                 *nr-adr-width* 
-                 *nr-W*
-                 *nr-I*))
+  (set! *data* (make-data *npsv-func*
+                 *npsv-min*
+                 *npsv-max*
+                 *npsv-adr-width* 
+                 *npsv-W*
+                 *npsv-I*))
   (make-verilog-file *instance* *npsv-rtl-output-dir*
                      (eval rtl-template (interaction-environment)))
 
-  
-;      (make-rtl
-;       *npsv-rtl-output-dir*
-;       *npsv-module-name*
-;       data
-;       *npsv-adr-width*
-;       *npsv-W*
-;       )
-;      (make-testbench
-;       *npsv-testbench-output-dir*
-;       *npsv-module-name*
-;       *npsv-adr-width*
-;       *npsv-W*)
-;      (make-template *npsv-template-output-dir* *npsv-module-name*)))
-;
+
     0)
 
 

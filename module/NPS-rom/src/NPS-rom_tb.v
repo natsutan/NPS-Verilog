@@ -37,7 +37,7 @@ module NPS_rom_tb # (parameter DATA_WIDTH = 24 ,  ADR_WIDTH = 9) ();
     # (PERIOD * 5)  reset_x = 1;
 
     
-    for(i=0;i<512;i=i+1)begin
+    for(i=0;i<(2^ADR_WIDTH);i=i+1)begin
       # (PERIOD) datai = i; vi = 1;
     end
     vi = 0;
