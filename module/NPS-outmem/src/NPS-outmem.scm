@@ -68,19 +68,77 @@
                     *npsv-W* *npsv-I*
                     ))
   (print-instance *instance*)
-  ;(make-verilog-file *instance* *npsv-rtl-output-dir*
-  ;                    (eval rtl-template (interaction-environment)))
-  ;(make-template *instance* *npsv-template-output-dir*)
-  ;(make-initialize-file *instance* *npsv-init-file* *npsv-testbench-output-dir* *npsv-W* *npsv-I*)
-  ;(make-verilog-testbench-file *instance* *npsv-testbench-output-dir*
-  ;                              (eval testbench-template (interaction-environment))))
+  (make-verilog-file *instance* *npsv-rtl-output-dir*
+                      (eval rtl-template (interaction-environment)))
+  (make-template *instance* *npsv-template-output-dir*)
+  (make-verilog-testbench-file *instance* *npsv-testbench-output-dir*
+                                (eval testbench-template (interaction-environment)))
   )
 
 ;;; --------------------------------------------------------------------------------
 ;;; verilog source
 ;;; --------------------------------------------------------------------------------
 (define rtl-template
-'#"module ~*npsv-module-name* # (parameter DATA_WIDTH = ~*npsv-W* , DATA_NUM = ~*npsv-data-num*, DELTA_T = ~*npsv-delta-T* , ADR_WIDTH = ~(datanum->adr-w *npsv-data-num*), DELTA_WIDTH = ~(datanum->adr-w *npsv-delta-T*) )
+'#"module ~*npsv-module-name* # (parameter DATA_WIDTH = ~*npsv-W* , DATA_NUM = ~*npsv-data-num* , ADR_WIDTH = ~(datanum->adr-w *npsv-data-num*) )
+(
+ input 			     clk,
+ input 			     reset_x,
+ input 			     start,
+ input 			     set,
+ input 			     vi,
+ input 			     fi,
+ output reg 		     vo,
+ output reg 		     fo,
+ input [DATA_WIDTH-1:0]     datai,
+
+ //CPU I/F
+ input [ADR_WIDTH-1:0] 	     cpu_adr,
+ output reg [DATA_WIDTH-1:0] cpu_data,
+ input 			     cpu_rd			     
+  
+);
+  reg [ADR_WIDTH:0] 	     adr_cnt;
+  reg [DATA_WIDTH-1:0] mem [0:DATA_NUM-1];
+
+  // CPU read
+  always @ (posedge clk or negedge reset_x) begin
+    if(reset_x == 1'b0)begin
+      cpu_data <= 0;
+    end else if(cpu_rd)begin
+      cpu_data <= mem[cpu_adr];
+    end 
+  end
+
+  // mem write
+  always @ (posedge clk or negedge reset_x) begin
+    if(vi)begin
+      mem[adr_cnt] <= datai;
+    end
+  end
+  
+  //adr cnt
+ always @ (posedge clk or negedge reset_x)begin
+    if(reset_x == 0)begin
+      adr_cnt <= 0;
+    end else begin
+      if(vi)begin
+	adr_cnt <= adr_cnt + 1;
+      end
+    end
+ end 
+  
+ always @ (posedge clk or negedge reset_x) begin
+    if(reset_x == 0)begin
+      vo <= 0;
+      fo <= 0;
+    end else begin
+      vo <= vi;
+      fo <= fi;
+    end
+ end
+
+  
+endmodule // mem
 "
   
   )
@@ -88,5 +146,78 @@
 (define testbench-template
   '#"
 module ~|*npsv-module-name*|_tb();
+  parameter DATA_WIDTH = ~*npsv-W*;
+  parameter DATA_NUM = ~*npsv-data-num*;
+  parameter ADR_WIDTH = ~(datanum->adr-w *npsv-data-num*) ;
+
+  reg 			     clk;
+  reg 			     reset_x;
+  reg 			     start;
+  reg 			     set;
+  wire 			     vo;
+  wire 			     fo;
+  reg 			     vi;
+  reg 			     fi;
+  reg [DATA_WIDTH-1:0] 	     datai;
+
+  //CPU I/F
+  reg [ADR_WIDTH-1:0] 	     cpu_adr;
+  wire [DATA_WIDTH-1:0]      cpu_data;
+  reg 			     cpu_rd;
+
+  integer 		     i;
+  integer 		     fp;
+  
+  parameter PERIOD = 10.0;
+  always # (PERIOD/2) clk = !clk;
+  initial begin 
+    clk = 1;
+  end
+  
+  ~*npsv-module-name* U0
+    (
+     .clk(clk),
+     .reset_x(reset_x),
+     .start(start),
+     .set(set),
+     .vo(vo),
+     .fo(fo),
+     .vi(vi),
+     .fi(fi),
+     .datai(datai),
+     .cpu_adr(cpu_adr),
+     .cpu_data(cpu_data),
+     .cpu_rd(cpu_rd)
+     );
+
+
+  initial begin
+    fp=$fopen(\"~|*npsv-module-name*|_dump.txt\");
+    #1 reset_x = 1; cpu_adr = 0; cpu_rd = 0; set = 0; start = 0; datai = 0; vi = 0; fi = 0;
+    # (PERIOD * 3)  reset_x = 0;
+    # (PERIOD * 5)  reset_x = 1;
+
+    for(i=0;i<DATA_NUM;i=i+1)begin
+      #(PERIOD) vi = 1; datai = i;
+    end
+    vi = 0;
+    #(PERIOD)
+    fi = 1;
+    @(posedge fo)      
+
+    for(i=0;i<DATA_NUM;i=i+1)begin
+      #(PERIOD) cpu_rd = 1; cpu_adr = i;
+      #(PERIOD) $fwrite(fp, \"%X\\n\", cpu_data);
+    end
+    cpu_rd = 0;
+
+      
+    # (PERIOD * 10)  $finish();
+  end
+
+
+
+  
+endmodule // NPS
 "
   )
