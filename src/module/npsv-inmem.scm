@@ -1,11 +1,16 @@
 (use srfi-1)
-(add-load-path "../../../common/" :relative)
-(require "npsv")
 
-(define *instance* '())
+(define-module npsv-inmem
+  (export make-inmem-from-file))
 
-(define print-setting
-  (lambda ()
+(define-class <npsv-inmem> (<npsv-module>)
+  ((init-file :init-keyword :init-file)))
+
+(define make-inmem-from-file
+  (lambda (fname)
+    (print "in make-inmem-from-file")))
+
+(define-method print-setting ((inst <npsv-inmem>))
     (format #t "module name ~A~%" *npsv-module-name*)
     (format #t "data number ~A~%" *npsv-data-num*)
     (format #t "initialize file ~A~%" *npsv-init-file*)
@@ -14,7 +19,7 @@
 
     (format #t "output dir ~A~%" *npsv-rtl-output-dir*)
     (format #t "testbench dir ~A~%" *npsv-testbench-output-dir*)
-    (format #t "template dir ~A~%" *npsv-template-output-dir*)))
+    (format #t "template dir ~A~%" *npsv-template-output-dir*))
 
 (define make-instance
   (lambda (name data-num init-file W I delta)
@@ -288,3 +293,5 @@ endmodule // NPS
   "
   )
 
+
+(provide "npsv-inmem")
