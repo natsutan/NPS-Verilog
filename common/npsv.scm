@@ -17,8 +17,9 @@
    (msb :init-keyword :msb :init-value 0)
    (special :init-keyword :special :init-value #f)
    (comment :init-keyword :comment :init-value "")
-   (type :init-keyword :type :init-value 'signal)))
-
+   (type :init-keyword :type :init-value 'signal)
+   (ch :init-keyword :ch :init-value 0)
+   ))
 
 (define-class <npsv-fixed-port> (<npsv-port>)
   ((fixed-info :init-keyword :fixed-info)))
