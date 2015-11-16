@@ -99,4 +99,17 @@
                       (string-append "[" (number->string msb) ":" (number->string lsb) "]"))))
       (string-append dir " " slise " " name))))
 
+
+(define-method print-setting ((inst <npsv-module>))
+  (format #t "==== ~A ====~%" (ref inst 'type))
+  (format #t "name ~A~%"  (ref inst 'name)))
+
+(define print-setting-dirs
+  (lambda (inst)
+    (format #t "output dir ~A~%" (ref inst 'rtl-output-dir))
+    (format #t "testbench dir ~A~%" (ref inst 'testbench-output-dir))
+    (format #t "template dir ~A~%" (ref inst 'template-ouput-dir))))
+
+
+
 (provide "npsv-core")

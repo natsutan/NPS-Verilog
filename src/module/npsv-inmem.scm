@@ -3,27 +3,55 @@
 (define-module npsv-inmem
   (export make-inmem-from-file))
 
+(define *inmem-parameters*
+  '(*npsv-module-name*
+    *npsv-data-num*
+    *npsv-init-file*
+    *npsv-W*
+    *npsv-I*
+    *npsv-delta-T*
+    *npsv-rtl-output-dir*
+    *npsv-testbench-output-dir*
+    *npsv-template-output-dir*))
+               
 (define-class <npsv-inmem> (<npsv-module>)
-  ((init-file :init-keyword :init-file)))
+  ((data-num :init-keyword :data-num)
+   (init-file :init-keyword :init-file)
+   (W :init-keyword :W)
+   (I :init-keyword :I)
+   (delta :init-keyword :delta)
+   ))
 
 (define make-inmem-from-file
   (lambda (fname)
-    (print "in make-inmem-from-file")))
+    (clear-global-parameters! *inmem-parameters*)
+    (load-setting-file fname)
+    (make-inmem-instance
+     *npsv-module-name*
+     *npsv-data-num*
+     *npsv-init-file*
+     *npsv-W* *npsv-I*
+     *npsv-delta-T*
+     *npsv-rtl-output-dir*
+     *npsv-testbench-output-dir*
+     *npsv-template-output-dir*
+     )))
 
 (define-method print-setting ((inst <npsv-inmem>))
-    (format #t "module name ~A~%" *npsv-module-name*)
-    (format #t "data number ~A~%" *npsv-data-num*)
-    (format #t "initialize file ~A~%" *npsv-init-file*)
-    (format #t "fixed number W ~A I ~A~%" *npsv-W* *npsv-I*)
-    (format #t "delta T ~A ~%" *npsv-delta-T*)
+  (next-method)
+  (format #t "data number ~A~%" (ref inst 'data-num))
+  (format #t "initialize file ~A~%" (ref inst 'init-file))
+  (format #t "fixed number W ~A I ~A~%" (ref inst 'W) (ref inst 'I))
+  (format #t "delta T ~A ~%" (ref inst 'delta))
+  (print-setting-dirs inst)
+  )
 
-    (format #t "output dir ~A~%" *npsv-rtl-output-dir*)
-    (format #t "testbench dir ~A~%" *npsv-testbench-output-dir*)
-    (format #t "template dir ~A~%" *npsv-template-output-dir*))
 
-(define make-instance
-  (lambda (name data-num init-file W I delta)
-    (let ([inst (make <npsv-module> :name name :type 'NPS-inmem :comment "input memory module")]
+(define make-inmem-instance
+  (lambda (name data-num init-file W I delta rtl-odir tb-odir temp-odir)
+    (let ([inst (make <npsv-inmem> :name name :type 'NPS-inmem :comment "input memory module"
+                      :data-num data-num :init-file init-file :W W :I I :delta delta
+                      :rtl-output-dir rtl-odir :testbench-output-dir tb-odir :template-ouput-dir temp-odir)]
           [adr_w (datanum->adr-w data-num)])
       (add-port inst (make <npsv-port> :name "start" :dir 'input))
       (add-port inst (make <npsv-port> :name "set" :dir 'input))
@@ -43,6 +71,9 @@
       (add-port inst (make <npsv-port> :name "cpu_wr" :dir 'input))
       inst)))
 
+(define-method make-verilog-file ((inst <npsv-inmem>))
+  (write-verilog-file inst (eval inmem-rtl-template (interaction-environment))))
+
 (define read-write-initialize-file
   (lambda (fpi fpo W I adr)
     (let ((buf (read-line fpi)))
@@ -59,46 +90,30 @@
     (format fp "// W = ~A, I = ~A~%" W I)))
 
 
-(define make-initialize-file
-  (lambda (inst initfilename odir W I)
-    (let* ([name (ref inst 'name)]
-           [fpi (open-input-file initfilename) ]
-           [fpo (open-verilog-file odir (string-append name "_init"))])
-      (format #f "open ~A~%" initfilename)
-      (write-initialize-file-header fpo name W I)
-      (read-write-initialize-file fpi fpo W I 0)
-      (close-verilog-file fpo)
-      (close-input-port fpi)
-      )))
+(define-method make-initialize-file ((inst <npsv-inmem>))
+  (let* ([name (ref inst 'name)]
+         [initfilename (ref inst 'init-file)]
+         [odir (ref inst 'testbench-output-dir)]
+         [W (ref inst 'W)]
+         [I (ref inst 'I)]
+         [fpi (open-input-file initfilename) ]
+         [fpo (open-verilog-file odir (string-append name "_init"))])
+    (format #t "open ~A (read) ~%" initfilename)
+    (format #t "open ~A~%" (string-append name "_init"))
+    (write-initialize-file-header fpo name W I)
+    (read-write-initialize-file fpi fpo W I 0)
+    (close-verilog-file fpo)
+    (close-input-port fpi)
+      ))
 
-;;; --------------------------------------------------------------------------------
-;;; main
-;;; --------------------------------------------------------------------------------
-(define (main args)
-  (when (not (= (length args) 2))
-    (usage-exit (car args)))
-  
-  (load-setting-file (second args))
-  (print-setting)
-  (set! *instance* (make-instance
-                    *npsv-module-name*
-                    *npsv-data-num*
-                    *npsv-init-file*
-                    *npsv-W* *npsv-I*
-                    *npsv-delta-T*))
-  ;(print-instance *instance*)
-  (make-verilog-file *instance* *npsv-rtl-output-dir*
-                      (eval rtl-template (interaction-environment)))
-  (make-template *instance* *npsv-template-output-dir*)
-  (make-initialize-file *instance* *npsv-init-file* *npsv-testbench-output-dir* *npsv-W* *npsv-I*)
-  (make-verilog-testbench-file *instance* *npsv-testbench-output-dir*
-                                (eval testbench-template (interaction-environment))))
+(define-method make-verilog-testbench-file ((inst <npsv-inmem>))
+  (write-verilog-testbench-file inst (eval inmem-testbench-template (interaction-environment))))
 
 
 ;;; --------------------------------------------------------------------------------
 ;;; verilog source
 ;;; --------------------------------------------------------------------------------
-(define rtl-template
+(define inmem-rtl-template
   '#"module ~*npsv-module-name* # (parameter DATA_WIDTH = ~*npsv-W* , DATA_NUM = ~*npsv-data-num*, DELTA_T = ~*npsv-delta-T* , ADR_WIDTH = ~(datanum->adr-w *npsv-data-num*), DELTA_WIDTH = ~(datanum->adr-w *npsv-delta-T*) )
 (
  input 			     clk,
@@ -215,7 +230,7 @@ endmodule // mem
   "
   )
 
-(define testbench-template
+(define inmem-testbench-template
   '#"
 module ~|*npsv-module-name*|_tb();
   parameter DATA_WIDTH = ~*npsv-W*;

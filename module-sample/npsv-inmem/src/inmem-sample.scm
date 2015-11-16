@@ -13,10 +13,10 @@
 
   (set! *instance* (make-inmem-from-file (second args)))
   (print-setting *instance*)
-;  (make-verilog-file *instance*)
-;  (make-template *instance*)
-;  (make-initialize-file *instance*)
-;  (make-verilog-testbench-file *instance*)
+  (make-verilog-file *instance*)
+  (make-template *instance*)
+  (make-initialize-file *instance*)
+  (make-verilog-testbench-file *instance*)
   0)
 
 

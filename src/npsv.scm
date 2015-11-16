@@ -3,7 +3,6 @@
 (use file.util)
 (add-load-path "module/" :relative)
 
-
 (define-module npsv
   (extend
    npsv-core
@@ -11,8 +10,6 @@
 
 (require "npsv-core")
 (require "npsv-inmem")
-
-
 
 ;;;--------------------------------------------------------------------------------
 ;;; RTL
@@ -41,17 +38,19 @@
   (lambda (fp)
     (format fp "~%")))
 
-(define make-verilog-file
-  (lambda (inst dir text)
+(define write-verilog-file
+  (lambda (inst text)
     (let* ([name (ref inst 'name)]
+           [dir (ref inst 'rtl-output-dir)]
            [fp (open-verilog-file dir name)])
       (write-header fp name)
       (format fp text)
       (close-verilog-file fp))))
 
-(define make-verilog-testbench-file
-  (lambda (inst dir text)
+(define write-verilog-testbench-file
+  (lambda (inst text)
     (let* ([name (ref inst 'name)]
+           [dir (ref inst 'testbench-output-dir)]
            [fp (open-verilog-file dir (string-append name "_tb"))])
       (write-header fp name)
       (format fp text)
@@ -62,14 +61,15 @@
   (lambda (fp ports)
     (let ([name (ref (car ports) 'name)])
       (if (= (length ports) 1)
-          (format fp "\t\t~A()~%" name)  ;; no camma
+          (format fp "\t\t.~A()~%" name)  ;; no camma
           (begin
-            (format fp "\t\t~A(),~%" name)
+            (format fp "\t\t.~A(),~%" name)
             (write-template-ports fp (cdr ports)))))))
 
 (define make-template
-  (lambda (inst dir)
+  (lambda (inst)
     (let* ([name (ref inst 'name)]
+           [dir (ref inst 'template-ouput-dir)]
            [fp (open-verilog-file dir (string-append name "_template"))])
       (write-header fp name)
       (write-cr fp)
@@ -111,8 +111,14 @@
 
 (define load-setting-file
   (lambda (fname)
-    (format #t "load ~A" fname)
-    (load fname)))
+    (format #t "load ~A~%" fname)
+    (load fname :environment (current-module))))
+    
+(define clear-global-parameters!
+  (lambda (params)
+    (dolist (p params)
+            (set! p '()))))
+
 
 ;;misc
 (define usage-exit

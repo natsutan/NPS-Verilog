@@ -1,6 +1,6 @@
 ; sample file
 (define *npsv-data-num* 300)    ; integer word length
-(define *npsv-init-file* "../sample/xtrain.dat")
+(define *npsv-init-file* "../setting/xtrain.dat")
 (define *npsv-W* 24)   ; total word length
 (define *npsv-I* 8)    ; integer word length
 (define *npsv-delta-T* 2)    ; integer word length
