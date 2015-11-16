@@ -1,22 +1,47 @@
 (use srfi-1)
-(add-load-path "../../../common/" :relative)
-(require "npsv")
 
-(define *instance* '())
+(define-module npsv-outmem
+  (export make-outmem-from-file))
 
-(define print-setting
-  (lambda ()
-    (format #t "module name ~A~%" *npsv-module-name*)
-    (format #t "data number ~A~%" *npsv-data-num*)
-    (format #t "fixed number W ~A I ~A~%" *npsv-W* *npsv-I*)
+(define *outmnem-parameters*
+  '(*npsv-data-num*
+    *npsv-W*
+    *npsv-I*
+    *npsv-module-name*
+    *npsv-rtl-output-dir*
+    *npsv-testbench-output-dir*
+    *npsv-template-output-dir*))
 
-    (format #t "output dir ~A~%" *npsv-rtl-output-dir*)
-    (format #t "testbench dir ~A~%" *npsv-testbench-output-dir*)
-    (format #t "template dir ~A~%" *npsv-template-output-dir*)))
+(define-class <npsv-outmem> (<npsv-module>)
+  ((data-num :init-keyword :data-num)
+   (W :init-keyword :W)
+   (I :init-keyword :I)))
 
-(define make-instance
-  (lambda (name data-num W I)
-    (let ([inst (make <npsv-module> :name name :type 'NPS-outmem :comment "output memory module")]
+(define-method print-setting ((inst <npsv-outmem>))
+  (next-method)
+  (format #t "data number ~A~%" (ref inst 'data-num))
+  (format #t "fixed number W ~A I ~A~%" (ref inst 'W) (ref inst 'I)))
+  
+(define make-outmem-from-file
+ (lambda (fname)
+  (clear-global-parameters! *outmnem-parameters*)
+  (load-setting-file fname)
+  (make-outmem-instance
+   *npsv-module-name*
+   *npsv-data-num*
+   *npsv-W*
+   *npsv-I*
+   *npsv-rtl-output-dir*
+   *npsv-testbench-output-dir*
+   *npsv-template-output-dir*
+   )))
+
+
+(define make-outmem-instance
+  (lambda (name data-num W I rtl-odir tb-odir temp-odir)
+    (let ([inst (make <npsv-outmem>  :name name :type 'npsv-outmem :comment "output memory module"
+                      :data-num data-num :W W :I I
+                      :rtl-output-dir rtl-odir :testbench-output-dir tb-odir :template-ouput-dir temp-odir)]
           [adr_w (datanum->adr-w data-num)])
       (add-port inst (make <npsv-port> :name "start" :dir 'input))
       (add-port inst (make <npsv-port> :name "set" :dir 'input))
@@ -38,47 +63,17 @@
       (add-port inst (make <npsv-port> :name "cpu_rd" :dir 'input))
       inst)))
 
-(define read-write-initialize-file
-  (lambda (fpi fpo W I adr)
-    (let ((buf (read-line fpi)))
-      (when (not (eof-object? buf))
-        (let ((n (string->number buf)))
-          (when n              
-            (let ((s (toFix n W I)))
-              (format fpo "\tcpu_wr_task(~A,~A);  // ~A~%" adr s buf)
-              (read-write-initialize-file fpi fpo W I (+ adr 1)))))))))
+(define-method make-verilog-file ((inst <npsv-outmem>))
+  (write-verilog-file inst (eval outmem-rtl-template (interaction-environment))))
 
-(define write-initialize-file-header
-  (lambda (fp name W I )
-    (write-header fp name)
-    (format fp "// W = ~A, I = ~A~%" W I)))
+(define-method make-verilog-testbench-file ((inst <npsv-outmem>))
+  (write-verilog-testbench-file inst (eval outmem-testbench-template (interaction-environment))))
 
-;;; --------------------------------------------------------------------------------
-;;; main
-;;; --------------------------------------------------------------------------------
-(define (main args)
-  (when (not (= (length args) 2))
-    (usage-exit (car args)))
-  
-  (load-setting-file (second args))
-  (print-setting)
-  (set! *instance* (make-instance
-                    *npsv-module-name*
-                    *npsv-data-num*
-                    *npsv-W* *npsv-I*
-                    ))
-  (print-instance *instance*)
-  (make-verilog-file *instance* *npsv-rtl-output-dir*
-                      (eval rtl-template (interaction-environment)))
-  (make-template *instance* *npsv-template-output-dir*)
-  (make-verilog-testbench-file *instance* *npsv-testbench-output-dir*
-                                (eval testbench-template (interaction-environment)))
-  )
 
 ;;; --------------------------------------------------------------------------------
 ;;; verilog source
 ;;; --------------------------------------------------------------------------------
-(define rtl-template
+(define outmem-rtl-template
 '#"module ~*npsv-module-name* # (parameter DATA_WIDTH = ~*npsv-W* , DATA_NUM = ~*npsv-data-num* , ADR_WIDTH = ~(datanum->adr-w *npsv-data-num*) )
 (
  input 			     clk,
@@ -143,7 +138,7 @@ endmodule // mem
   
   )
 
-(define testbench-template
+(define outmem-testbench-template
   '#"
 module ~|*npsv-module-name*|_tb();
   parameter DATA_WIDTH = ~*npsv-W*;
@@ -214,10 +209,8 @@ module ~|*npsv-module-name*|_tb();
       
     # (PERIOD * 10)  $finish();
   end
-
-
-
   
 endmodule // NPS
 "
   )
+(provide "npsv-outmem")

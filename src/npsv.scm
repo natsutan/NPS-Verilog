@@ -6,10 +6,12 @@
 (define-module npsv
   (extend
    npsv-core
-   npsv-inmem))
+   npsv-inmem
+   npsv-outmem))
 
 (require "npsv-core")
 (require "npsv-inmem")
+(require "npsv-outmem")
 
 ;;;--------------------------------------------------------------------------------
 ;;; RTL
