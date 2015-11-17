@@ -115,40 +115,6 @@
   (write-verilog-testbench-file inst (eval rom-testbench-template (interaction-environment))))
 
 
-
-
-;;; --------------------------------------------------------------------------------
-;;; main
-;;; --------------------------------------------------------------------------------
-(define (main args)
-  (when (not (= (length args) 2))
-    (usage-exit (car args)))
-
-  (load-setting-file (second args))
-  (print-setting)
-  (set! *instance* (make-instance 
-                 *npsv-module-name*
-                 *npsv-min*
-                 *npsv-max*
-                 *npsv-adr-width* 
-                 *npsv-W*
-                 *npsv-I*))
-  (print-instance *instance*)
-  (set! *data* (make-data *npsv-func*
-                 *npsv-min*
-                 *npsv-max*
-                 *npsv-adr-width* 
-                 *npsv-W*
-                 *npsv-I*))
-  (make-verilog-file *instance* *npsv-rtl-output-dir*
-                     (eval rtl-template (interaction-environment)))
-  (make-template *instance* *npsv-template-output-dir*)
-  (make-verilog-testbench-file *instance* *npsv-testbench-output-dir*
-                               (eval testbench-template (interaction-environment)))
-
-  0)
-
-
 ;;; --------------------------------------------------------------------------------
 ;;; verilog source
 ;;; --------------------------------------------------------------------------------
