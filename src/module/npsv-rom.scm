@@ -1,21 +1,71 @@
-(use srfi-1)
-(add-load-path "../../../common/" :relative)
-(require "npsv")
 
-(define *instance* '())
+(define-module npsv-rom
+  (export make-rom-from-file))
+
 (define *data* '())
 
-(define print-setting
-  (lambda ()
-    (format #t "function ~A~%" sin)
-    (format #t "range ~A - ~A~%" *npsv-min* *npsv-max*)
-    (format #t "adr width ~A~%"  *npsv-adr-width*)
-    (format #t "data width ~A (integer ~A)~%" *npsv-W* *npsv-I*)
-    (format #t "module name ~A~%" *npsv-module-name*)
-    (format #t "output dir ~A~%" *npsv-rtl-output-dir*)
-    (format #t "testbench dir ~A~%" *npsv-testbench-output-dir*)
-    (format #t "template dir ~A~%" *npsv-template-output-dir*)))
+(define *outmnem-parameters*
+  '(
+    *npsv-data-num*
+    *npsv-adr-width*
+    *npsv-min*
+    *npsv-max*
+    *npsv-W*
+    *npsv-I*
+    *npsv-func*
+    *npsv-module-name*
+    *npsv-rtl-output-dir*
+    *npsv-testbench-output-dir*
+    *npsv-template-output-dir*))
 
+(define-class <npsv-rom> (<npsv-module>)
+  ((min :init-keyword :min)
+   (max :init-keyword :max)
+   (adr-width :init-keyword :adr-width)
+   (func :init-keyword :func)
+   (W :init-keyword :W)
+   (I :init-keyword :I)))
+
+(define-method print-setting ((inst <npsv-rom>))
+  (next-method)
+  (format #t "min ~A~%" (ref inst 'min))
+  (format #t "max ~A~%" (ref inst 'max))
+  (format #t "adress width ~A~%" (ref inst 'adr-width))
+  (format #t "func ~A~%" (ref inst 'func))
+  (format #t "fixed number W ~A I ~A~%" (ref inst 'W) (ref inst 'I)))
+
+(define make-rom-from-file
+ (lambda (fname)
+  (clear-global-parameters! *outmnem-parameters*)
+  (load-setting-file fname)
+  (make-rom-instance
+    *npsv-module-name*
+    *npsv-min*
+    *npsv-max*
+    *npsv-adr-width*
+    *npsv-W*
+    *npsv-I*
+    *npsv-func*
+    *npsv-rtl-output-dir*
+    *npsv-testbench-output-dir*
+    *npsv-template-output-dir*
+   )))
+
+(define make-rom-instance
+  (lambda (name min max adr-w W I func rtl-odir tb-odir temp-odir)
+    (let ([inst (make <npsv-rom> :name name :type 'npsv-rom :comment "rom module"
+                      :min min :max max :adr-width adr-w  :W W :I I :func func
+                      :rtl-output-dir rtl-odir :testbench-output-dir tb-odir :template-ouput-dir temp-odir)]
+          [fixed (make <npsv-fixed> :W W :I I)])
+      (add-port inst (make <npsv-port> :name "start" :dir 'input :comment "no use"))
+      (add-port inst (make <npsv-port> :name "set" :dir 'input :comment "no use"))
+      (add-port inst (make <npsv-port> :name "vi" :dir 'input))
+      (add-port inst (make <npsv-port> :name "fi" :dir 'input))
+      (add-port inst (make <npsv-port> :name "vo" :dir 'output :type 'reg))
+      (add-port inst (make <npsv-port> :name "fo" :dir 'output :type 'reg))
+      (add-port inst (make <npsv-fixed-port> :name "datao" :dir 'output :msb (- W 1) :lsb 0 :fixed-info fixed :type 'reg))
+      (add-port inst (make <npsv-port> :name "datai" :dir 'input :msb (- adr-w 1) :lsb 0 :type 'address))
+      inst)))
 
 ;;; --------------------------------------------------------------------------------
 ;;; make rom data
@@ -23,14 +73,20 @@
 
 
 (define make-data
-  (lambda (func min max adrw W I)
-    (let* ((num (power 2 adrw))
-	   (data (make-vector num))
-	   (unit (/ (- max min) num)))
-      (dotimes(x num)
-       (vector-set! data x (toFix (func (+ (* x unit) min)) W I)))
-;      (print data)
-      (vector->list data))))
+  (lambda (inst)
+    (let ([func (ref inst 'func)]
+          [min (ref inst 'min)]
+          [max (ref inst 'max)]
+          [adr-w (ref inst 'adr-width)]
+          [W (ref inst 'W)]
+          [I (ref inst 'I)])
+      (let* ((num (power 2 adr-w))
+             (data (make-vector num))
+             (unit (/ (- max min) num)))
+        (dotimes(x num)
+                (vector-set! data x (toFix (func (+ (* x unit) min)) W I)))
+                                        ;      (print data)
+        (vector->list data)))))
 
 
 ;;; --------------------------------------------------------------------------------
@@ -51,22 +107,14 @@
                  num dataw (romdata->string (car data) dataw))
          (insert-rom-data (cdr data) dataw (+ num 1))))))
 
-;;; --------------------------------------------------------------------------------
-;;; verilog template
-;;; --------------------------------------------------------------------------------
-(define make-instance
-  (lambda (name min max adr-w W I)
-    (let ([inst (make <npsv-module> :name name :type 'NPS-rom :comment "rom module")]
-          [fixed (make <npsv-fixed> :W W :I I)])
-      (add-port inst (make <npsv-port> :name "start" :dir 'input :comment "no use"))
-      (add-port inst (make <npsv-port> :name "set" :dir 'input :comment "no use"))
-      (add-port inst (make <npsv-port> :name "vi" :dir 'input))
-      (add-port inst (make <npsv-port> :name "fi" :dir 'input))
-      (add-port inst (make <npsv-port> :name "vo" :dir 'output :type 'reg))
-      (add-port inst (make <npsv-port> :name "fo" :dir 'output :type 'reg))
-      (add-port inst (make <npsv-fixed-port> :name "datao" :dir 'output :msb (- W 1) :lsb 0 :fixed-info fixed :type 'reg))
-      (add-port inst (make <npsv-port> :name "datai" :dir 'input :msb (- adr-w 1) :lsb 0 :type 'address))
-      inst)))
+(define-method make-verilog-file ((inst <npsv-rom>))
+  (set! *data* (make-data inst))
+  (write-verilog-file inst (eval rom-rtl-template (interaction-environment))))
+
+(define-method make-verilog-testbench-file ((inst <npsv-rom>))
+  (write-verilog-testbench-file inst (eval rom-testbench-template (interaction-environment))))
+
+
 
 
 ;;; --------------------------------------------------------------------------------
@@ -104,7 +152,7 @@
 ;;; --------------------------------------------------------------------------------
 ;;; verilog source
 ;;; --------------------------------------------------------------------------------
-(define rtl-template
+(define rom-rtl-template
   '#"module ~*npsv-module-name* # (parameter DATA_WIDTH = ~*npsv-W* , ADR_WIDTH = ~(ceiling *npsv-adr-width*))
   (
     input 			clk,
@@ -143,7 +191,7 @@ endmodule
 
 ")
 
-(define testbench-template
+(define rom-testbench-template
   '#"
 module ~|*npsv-module-name*|_tb();
   parameter DATA_WIDTH = ~*npsv-W*;
@@ -207,3 +255,5 @@ module ~|*npsv-module-name*|_tb();
   
 endmodule
 ")
+
+(provide "npsv-rom")

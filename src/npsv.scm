@@ -7,11 +7,14 @@
   (extend
    npsv-core
    npsv-inmem
-   npsv-outmem))
+   npsv-outmem
+   npsv-rom
+   ))
 
 (require "npsv-core")
 (require "npsv-inmem")
 (require "npsv-outmem")
+(require "npsv-rom")
 
 ;;;--------------------------------------------------------------------------------
 ;;; RTL
