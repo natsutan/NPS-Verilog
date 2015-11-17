@@ -1,7 +1,6 @@
 (define-module npsv-misc
   (export-all))
 
-
 ;;misc
 (define quantize
   (lambda (x)
@@ -22,8 +21,6 @@
   (lambda (params)
     (dolist (p params)
             (set! p '()))))
-
-
 
 (define usage-exit
   (lambda (program-name)

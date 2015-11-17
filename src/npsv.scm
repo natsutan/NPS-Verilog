@@ -12,6 +12,7 @@
    npsv-inmem
    npsv-outmem
    npsv-rom
+   npsv-dataflow
    ))
 
 (require "npsv-core")
@@ -21,5 +22,6 @@
 (require "npsv-inmem")
 (require "npsv-outmem")
 (require "npsv-rom")
-
+(require "npsv-dataflow")
+ 
 (provide "npsv")
