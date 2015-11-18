@@ -49,7 +49,7 @@
 
 (define make-inmem-instance
   (lambda (name data-num init-file W I delta rtl-odir tb-odir temp-odir)
-    (let ([inst (make <npsv-inmem> :name name :type 'NPS-inmem :comment "input memory module"
+    (let ([inst (make <npsv-inmem> :name name :type 'npsv-inmem :comment "input memory module"
                       :data-num data-num :init-file init-file :W W :I I :delta delta
                       :rtl-output-dir rtl-odir :testbench-output-dir tb-odir :template-ouput-dir temp-odir)]
           [adr_w (datanum->adr-w data-num)])

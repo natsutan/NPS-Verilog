@@ -14,11 +14,14 @@
 (connect inp sinrom)
 (connect sinrom outp)
 
+
+
 (print (npsv-get-top))
 
 ;(make-top-rtl)
 ;(make-top-testbench)
-;(make-dataflow)
+(make-dataflow)
+
 
 
 
