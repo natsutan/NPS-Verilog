@@ -67,6 +67,14 @@
       (add-port inst (make <npsv-port> :name "datai" :dir 'input :msb (- adr-w 1) :lsb 0 :type 'address))
       inst)))
 
+
+(define-method add-top-ports ((inst <npsv-rom>))
+  0)
+
+
+             
+
+
 ;;; --------------------------------------------------------------------------------
 ;;; make rom data
 ;;; --------------------------------------------------------------------------------

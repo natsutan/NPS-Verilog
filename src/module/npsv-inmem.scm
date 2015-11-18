@@ -109,6 +109,17 @@
 (define-method make-verilog-testbench-file ((inst <npsv-inmem>))
   (write-verilog-testbench-file inst (eval inmem-testbench-template (interaction-environment))))
 
+(define-method add-top-ports (top (inst <npsv-inmem>))
+  (let ([name (ref inst 'name)]
+        [W (ref inst 'W)]
+        [I (ref inst 'I)]
+        [adr_w (datanum->adr-w (ref inst 'data-num))])
+    (add-port top (make <npsv-port> :name (string-append name "_cpu_adr") :dir 'input :lsb 0 :msb (- adr_w 1)))
+    (add-port top (make <npsv-port> :name (string-append name "_cpu_data") :dir 'input :lsb 0 :msb (- W 1)))
+    (add-port top (make <npsv-port> :name (string-append name "_cpu_wr") :dir 'input))
+  ))
+
+
 
 ;;; --------------------------------------------------------------------------------
 ;;; verilog source

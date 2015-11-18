@@ -63,11 +63,27 @@
       (add-port inst (make <npsv-port> :name "cpu_rd" :dir 'input))
       inst)))
 
+
+
+
 (define-method make-verilog-file ((inst <npsv-outmem>))
   (write-verilog-file inst (eval outmem-rtl-template (interaction-environment))))
 
 (define-method make-verilog-testbench-file ((inst <npsv-outmem>))
   (write-verilog-testbench-file inst (eval outmem-testbench-template (interaction-environment))))
+
+
+(define-method add-top-ports (top (inst <npsv-outmem>))
+  (let ([name (ref inst 'name)]
+        [W (ref inst 'W)]
+        [I (ref inst 'I)]
+        [adr_w (datanum->adr-w (ref inst 'data-num))])
+    (add-port top (make <npsv-port> :name (string-append name "_cpu_adr") :dir 'input :lsb 0 :msb (- adr_w 1)))
+    (add-port top (make <npsv-port> :name (string-append name "_cpu_data") :dir 'output :lsb 0 :msb (- W 1)))
+    (add-port top (make <npsv-port> :name (string-append name "_cpu_rd") :dir 'input))
+    (add-port top (make <npsv-port> :name (string-append name "_fo") :dir 'output))
+  
+  ))
 
 
 ;;; --------------------------------------------------------------------------------

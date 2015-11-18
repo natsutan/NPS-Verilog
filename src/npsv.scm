@@ -13,6 +13,7 @@
    npsv-outmem
    npsv-rom
    npsv-dataflow
+   npsv-build-top
    ))
 
 (require "npsv-core")
@@ -23,5 +24,6 @@
 (require "npsv-outmem")
 (require "npsv-rom")
 (require "npsv-dataflow")
-
+(require "npsv-build-top")
+          
 (provide "npsv")

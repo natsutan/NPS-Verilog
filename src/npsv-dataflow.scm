@@ -1,8 +1,11 @@
+(use gauche.process)
+
 (define-module npsv-dataflow
   (export-all))
 
-(define *top* '())
+(define *ch* '())
 (define *top-name* "")
+(define *module* '())
 
 (define-class <npsv-ch> ()
   ((src :init-keyword :src)
@@ -13,30 +16,45 @@
 (define npsv-initialize!
   (lambda (topname)
     (set! *top-name* topname)
-    (set! *top* '())))
+    (set! *module* '())
+    (set! *ch* '())))
 
 (define npsv-get-topname
   (lambda ()
     *top-name*))
 
-(define npsv-get-top
+(define npsv-get-ch
   (lambda ()
-    *top*))
+    *ch*))
+
+(define npsv-get-modules
+  (lambda () *module*))
+
 
 (define make-ch-name
   (lambda (src dst)
     (string-append (ref dst 'name) "_out")))
 
+(define add-module-to-top
+  (lambda (module)
+    (unless (member module *module*)
+      (set! *module* (cons module *module*)))))
+
 
 (define connect
   (lambda (src dst)
     (let ((connection (make <npsv-ch> :name (make-ch-name src dst) :src src :dst dst)))
-      (set! *top* (cons connection *top*)))))
+      (add-module-to-top src)
+      (add-module-to-top dst)
+      (set! *ch* (cons connection *ch*)))))
 
 (define make-dataflow
   (lambda ()
-    (make-dot-script *top-name* *top*)
-    ))
+    (make-dot-script *top-name* *ch*)
+    (let ((dot-file (string-append *top-name* ".dot"))
+          (out-file (string-append *top-name* ".png")))
+      (run-process (list "dot" "-Tpng"  dot-file "-o" out-file) :wait #t))))
+                 
 
 
 (define make-dot-script

@@ -13,12 +13,12 @@
 ; wire connection
 (connect inp sinrom)
 (connect sinrom outp)
+;(print (npsv-get-top))
+;(print (npsv-get-modules))
 
+(make-top-rtl "./output/rtl")
+(make-template (npsv-get-top))
 
-
-(print (npsv-get-top))
-
-;(make-top-rtl)
 ;(make-top-testbench)
 (make-dataflow)
 
