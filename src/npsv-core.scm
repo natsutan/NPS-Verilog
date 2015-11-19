@@ -37,19 +37,45 @@
    (template-ouput-dir :init-keyword :template-ouput-dir)
    ))
 
-(define-class <npsv-process> ()
-  ((label :init-keyword :label :init-value "")
-   (reset_process :init-keyword :reset)
-   (process :init-keyword :process)))
 
-(define-class <npsv-initial-process> (<npsv-process>)
-  ())
+;(define-class <npsv-wire> ()
+;   ((name :init-keyword :name)
+;    (assign :init-keyword :assign)))
 
-(define-class <npsv-wire> ()
-   ((name :init-keyword :name)
-    (assign :init-keyword :assign)))
+(define-class <npsv-ch> ()
+  ((src :init-keyword :src)
+   (dst :init-keyword :dst)
+   (ch  :init-keyword :ch :init-value 0)
+   (src-port :init-value :src-port)
+   (dst-port :init-value :dst-port)
+   (data-w :init-keyword :data-w :init-value 0)
+   (data-shift :init-keyword :data-shift 0 :init-value 0)
+   (name :init-keyword :name)))
 
-   
+(define get-ch-src-port
+  (lambda (ch)
+    (find-src-port (ref ch 'src))))
+
+(define-method find-src-port ((m <nspv-module>))
+  (find (lambda (e)
+          (eq? (ref e 'name) "datao"))
+        (ref m 'ports))
+
+(define get-ch-dst-port
+  (lambda (ch)
+    (find-dst-port (ref ch 'dst))))
+
+(define-method find-dst-port ((m <nspv-module>))
+  (find (lambda (e)
+          (eq? (ref e 'name) "datai"))
+        (ref m 'ports))
+  
+
+  
+(define make-ch-name
+  (lambda (src dst)
+    (string-append (ref dst 'name) "_out")))
+
 (define-method initialize ((self <npsv-module>) initargs)
   (next-method)
   (let ((clk (make <npsv-port> :name "clk" :dir 'input :spetial #t))
@@ -63,8 +89,8 @@
 (define-method add-process ((inst <npsv-module>) (process <npsv-process>))
   (set! (ref inst 'processes) (cons process (ref inst 'processes))))
     
-(define-method add-wire ((inst <npsv-module>) (process <npsv-wire>))
-  (set! (ref inst 'wires) (cons processes (ref inst 'wires))))
+;(define-method add-wire ((inst <npsv-module>) (process <npsv-wire>))
+;  (set! (ref inst 'wires) (cons processes (ref inst 'wires))))
 
 (define-method print ((inst <npsv-module>))
   (print (string-concatenate  (list "<npsv-module> " (ref inst 'name) " (" (symbol->string (ref inst 'type)) ")" )))
@@ -96,8 +122,20 @@
            (name (ref p 'name))
            (slise (if (and (zero? lsb) (zero? msb))
                       ""
-                      (string-append "[" (number->string msb) ":" (number->string lsb) "]"))))
-      (string-append dir " " slise " " name))))
+                      (string-append "[" (number->string msb) ":" (number->string lsb) "] "))))
+      (string-append dir slise name))))
+
+(define make-wire-string
+  (lambda (w)
+    (let* ((lsb (ref w 'lsb))
+           (msb (ref w 'msb))
+           (name (ref w 'name))
+           (slise (if (and (zero? lsb) (zero? msb))
+                      ""
+                      (string-append "[" (number->string msb) ":" (number->string lsb) "] "))))
+      (string-append slise name))))
+
+
 
 
 (define-method print-setting ((inst <npsv-module>))

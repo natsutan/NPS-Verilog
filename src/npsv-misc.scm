@@ -37,5 +37,9 @@
   (lambda (datanum)
     (ceiling->exact (log datanum 2))))
 
+(define last-elem?
+  (lambda (l)
+    (= (length ports) 1)))
+
 
 (provide "npsv-misc")
