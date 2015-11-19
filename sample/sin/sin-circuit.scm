@@ -1,3 +1,6 @@
+(use slib)
+(require 'trace)
+
 (add-load-path "../../src/" :relative)
 (use npsv)
 
