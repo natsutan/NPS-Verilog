@@ -27,6 +27,9 @@
 (define-class <npsv-fixed-port> (<npsv-port>)
   ((fixed-info :init-keyword :fixed-info)))
 
+(define-class <npsv-adr-port> (<npsv-port>)
+  ())
+
 (define-class <npsv-module> ()
   ((name :init-keyword :name)
    (type :init-keyword :type)
@@ -49,32 +52,31 @@
    (src-port :init-value :src-port)
    (dst-port :init-value :dst-port)
    (data-w :init-keyword :data-w :init-value 0)
-   (data-shift :init-keyword :data-shift 0 :init-value 0)
+   (data-shift :init-keyword :data-shift :init-value 0)
    (name :init-keyword :name)))
 
 (define get-ch-src-port
   (lambda (ch)
     (find-src-port (ref ch 'src))))
 
-(define-method find-src-port ((m <nspv-module>))
+(define-method find-src-port ((m <npsv-module>))
   (find (lambda (e)
-          (eq? (ref e 'name) "datao"))
-        (ref m 'ports))
+          (string=? (ref e 'name) "datao"))
+        (ref m 'ports)))
 
 (define get-ch-dst-port
   (lambda (ch)
     (find-dst-port (ref ch 'dst))))
 
-(define-method find-dst-port ((m <nspv-module>))
+(define-method find-dst-port ((m <npsv-module>))
   (find (lambda (e)
-          (eq? (ref e 'name) "datai"))
-        (ref m 'ports))
-  
+          (string=? (ref e 'name) "datai"))
+        (ref m 'ports)))
 
-  
+; wireñºÇÃí≤êÆÇ…égÇ§
 (define make-ch-name
   (lambda (src dst)
-    (string-append (ref dst 'name) "_out")))
+    (string-append (ref src 'name) "")))
 
 (define-method initialize ((self <npsv-module>) initargs)
   (next-method)
@@ -86,8 +88,8 @@
 (define-method add-port ((inst <npsv-module>) (port <npsv-port>))
   (set! (ref inst 'ports) (append (ref inst 'ports) (cons port '()))))
     
-(define-method add-process ((inst <npsv-module>) (process <npsv-process>))
-  (set! (ref inst 'processes) (cons process (ref inst 'processes))))
+;(define-method add-process ((inst <npsv-module>) (process <npsv-process>))
+;  (set! (ref inst 'processes) (cons process (ref inst 'processes))))
     
 ;(define-method add-wire ((inst <npsv-module>) (process <npsv-wire>))
 ;  (set! (ref inst 'wires) (cons processes (ref inst 'wires))))
@@ -123,7 +125,7 @@
            (slise (if (and (zero? lsb) (zero? msb))
                       ""
                       (string-append "[" (number->string msb) ":" (number->string lsb) "] "))))
-      (string-append dir slise name))))
+      (string-append dir " " slise " " name))))
 
 (define make-wire-string
   (lambda (w)

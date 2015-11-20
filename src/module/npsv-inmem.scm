@@ -72,6 +72,7 @@
       inst)))
 
 (define-method make-verilog-file ((inst <npsv-inmem>))
+  (set! *npsv-module-name* (ref inst 'name))
   (write-verilog-file inst (eval inmem-rtl-template (interaction-environment))))
 
 (define read-write-initialize-file
@@ -114,10 +115,47 @@
         [W (ref inst 'W)]
         [I (ref inst 'I)]
         [adr_w (datanum->adr-w (ref inst 'data-num))])
-    (add-port top (make <npsv-port> :name (string-append name "_cpu_adr") :dir 'input :lsb 0 :msb (- adr_w 1)))
-    (add-port top (make <npsv-port> :name (string-append name "_cpu_data") :dir 'input :lsb 0 :msb (- W 1)))
-    (add-port top (make <npsv-port> :name (string-append name "_cpu_wr") :dir 'input))
+    (add-port top (make <npsv-port> :name (inmem-cpu-adr-name name) :dir 'input :lsb 0 :msb (- adr_w 1)))
+    (add-port top (make <npsv-port> :name (inmem-cpu-data-name name) :dir 'input :lsb 0 :msb (- W 1)))
+    (add-port top (make <npsv-port> :name (inmem-cpu-wr-name name) :dir 'input))
   ))
+
+(define inmem-cpu-adr-name
+  (lambda (name)
+    (string-append name "_cpu_adr")))
+
+(define inmem-cpu-data-name
+  (lambda (name)
+    (string-append name "_cpu_data")))
+
+(define inmem-cpu-wr-name
+  (lambda (name)
+    (string-append name "_cpu_wr")))
+
+
+(define-method write-module-instantiation (fp (m <npsv-inmem>) channels)
+  (let* ([name (ref m 'name)]
+         [cpu-adr-name (inmem-cpu-adr-name name)]
+         [cpu-data-name (inmem-cpu-data-name name)]
+         [cpu-wr-name (inmem-cpu-wr-name name)]
+         [output-ch (find
+                     (lambda (ch)
+                       (eq? (ref ch 'src) m))
+                     channels)]
+         )
+    (format fp "\t~A ~A (\n" name name)
+    (write-common-connection fp)
+    (write-port-assign fp cpu-adr-name cpu-adr-name)
+    (write-port-assign fp cpu-data-name cpu-data-name)
+    (write-port-assign fp cpu-wr-name cpu-wr-name) 
+    (when (not output-ch)
+      (format #t "Error:no output ~A~%" name))
+
+    (write-outport-assign fp "vo" output-ch)
+    (write-outport-assign fp "fo" output-ch)
+    (write-outport-assign fp "datao" output-ch :last-flag #t)
+    (format fp "\t);\n");
+    ))
 
 
 

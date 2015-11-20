@@ -1,5 +1,4 @@
 
-
 ; sample file
 (define *npsv-data-num* 32)    ; integer word length
 (define *npsv-W* 16)   ; total word length

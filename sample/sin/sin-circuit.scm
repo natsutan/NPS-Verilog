@@ -19,9 +19,10 @@
 ;(print (npsv-get-top))
 ;(print (npsv-get-modules))
 
-(make-top-rtl "./output/rtl")
-(make-template (npsv-get-top))
 
+(make-all-rtl "./output/rtl")
+
+;(make-template (npsv-get-top))
 ;(make-top-testbench)
 (make-dataflow)
 

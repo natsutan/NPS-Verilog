@@ -43,7 +43,6 @@
       (add-module-to-top dst)
       (set! (ref connection 'src-port) src-port)
       (set! (ref connection 'dst-port) dst-port)
-      
       (set! *ch* (cons connection *ch*)))))
 
 
