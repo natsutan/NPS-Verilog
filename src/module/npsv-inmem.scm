@@ -72,6 +72,7 @@
       inst)))
 
 (define-method make-verilog-file ((inst <npsv-inmem>))
+  (set! *npsv-module-name* (ref inst 'name))
   (write-verilog-file inst (eval inmem-rtl-template (interaction-environment))))
 
 (define read-write-initialize-file

@@ -76,7 +76,7 @@
   (lambda ()
     *top-inst*))
 
-(define make-top-rtl
+(define make-all-rtl
   (lambda (odir)
     (make-top-module)
     ;(set! (ref *top-inst* 'rtl-output-dir) odir)
@@ -86,6 +86,10 @@
     (make-top-ports *top-inst*)
     (make-top-wires *top-inst*)
     (write-top-verilog odir *top-inst*)
+    
+    (dolist (m (ref *top-inst* 'module))
+            (make-verilog-file m))
+               
     
     
     (make-template *top-inst*)  
