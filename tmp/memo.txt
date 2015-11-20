@@ -1,29 +1,23 @@
-npsv.scmのファイルを分ける？
+portをクラス化
 
 クラス定義関係
 ファイルの読み書き関係
 固定小数点数関係
 Verilog出力関係
 
-(connect rom_a ram_b)
-(connect rom_b :port out2 func_a ;port in1)
-(connect func_c (connect rom_b rom_c))
+ポートの接続
 
-*wire* (
-	('wire00 (roma inp1) (romb inp2) (romc out2)
-	)
+①<npsv-port> <npsv-port>  出力側のビット幅に合わせる
 
-*instance* (roma romb romc)
+入力ポートのほうがビット幅が大きいとき、上位0埋め
+入力ポートのほうがビット幅が小さいとき、下位のみ接続
 
 
-標準のポート
+②<npsv-fixed-port>　<npsv-fixed-port>
+小数点の位置合わせ、いったんエラーで処理
 
-clk
-reset_x
-
-set, start
-datai, datao, vi, vo, fi, fo
-
+③<npsv-fixed-port>　<npsv-adr-port>
+ビット幅は出力側にあわせ、接続は下位切捨て or 下位0埋め
 
 
 

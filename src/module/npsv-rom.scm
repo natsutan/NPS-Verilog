@@ -64,7 +64,7 @@
       (add-port inst (make <npsv-port> :name "vo" :dir 'output :type 'reg))
       (add-port inst (make <npsv-port> :name "fo" :dir 'output :type 'reg))
       (add-port inst (make <npsv-fixed-port> :name "datao" :dir 'output :msb (- W 1) :lsb 0 :fixed-info fixed :type 'reg))
-      (add-port inst (make <npsv-port> :name "datai" :dir 'input :msb (- adr-w 1) :lsb 0 :type 'address))
+      (add-port inst (make <npsv-adr-port> :name "datai" :dir 'input :msb (- adr-w 1) :lsb 0 :type 'address))
       inst)))
 
 
