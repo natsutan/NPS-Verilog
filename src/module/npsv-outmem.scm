@@ -21,20 +21,23 @@
   (next-method)
   (format #t "data number ~A~%" (ref inst 'data-num))
   (format #t "fixed number W ~A I ~A~%" (ref inst 'W) (ref inst 'I)))
-  
+
+;; TODO separate make-verilog-file
 (define make-outmem-from-file
  (lambda (fname)
   (clear-global-parameters! *outmnem-parameters*)
   (load-setting-file fname)
-  (make-outmem-instance
-   *npsv-module-name*
-   *npsv-data-num*
-   *npsv-W*
-   *npsv-I*
-   *npsv-rtl-output-dir*
-   *npsv-testbench-output-dir*
-   *npsv-template-output-dir*
-   )))
+  (let ((inst  (make-outmem-instance
+                *npsv-module-name*
+                *npsv-data-num*
+                *npsv-W*
+                *npsv-I*
+                *npsv-rtl-output-dir*
+                *npsv-testbench-output-dir*
+                *npsv-template-output-dir*)))
+    (make-verilog-file inst)
+    inst)))
+
 
 
 (define make-outmem-instance

@@ -1,3 +1,4 @@
+
 (use gauche.process)
 
 (define-module npsv-dataflow
@@ -36,14 +37,38 @@
     (let ([connection (make <npsv-ch> :name (make-ch-name src dst) :src src :dst dst)]
           [src-port (find-src-port src)]
           [dst-port (find-dst-port dst)])
+
       (unless src-port (error "can't find src-port" (ref src 'name)))
       (unless dst-port (error "can't find dst-port" (ref dst 'name)))
-        
+
       (add-module-to-top src)
       (add-module-to-top dst)
-      (set! (ref connection 'src-port) src-port)
-      (set! (ref connection 'dst-port) dst-port)
-      (set! *ch* (cons connection *ch*)))))
+      (if (eqport? src-port dst-port)
+          (begin
+            (set! (ref connection 'src-port) src-port)
+            (set! (ref connection 'dst-port) dst-port)
+            (set! *ch* (cons connection *ch*)))
+          (begin
+            (let* ([pconv (make-portconv src-port dst-port (make-pconv-name src dst))])
+              (format #t "add portconv src:~A dst:~A~%" src dst)
+              (connect src pconv)
+              (connect pconv dst)))))))
+
+;; compare port
+
+(define-method eqport? ((a <npsv-fixed-port>) (b <npsv-fixed-port>))
+  (and (= (ref-W a) (ref-W b))
+       (= (ref-I a) (ref-I b)))) 
+
+(define-method eqport? ((a <npsv-adr-port>) (b <npsv-adr-port>))
+  (and (= (ref a 'lsb) (ref b 'lsb))
+       (= (ref a 'msb) (ref b 'msb)))) 
+
+
+;; always false
+(define-method eqport? ((a <npsv-port>) (b <npsv-port>))
+  #f)
+
 
 
 (define make-dataflow
@@ -81,9 +106,8 @@
     (let ([type (ref module 'type)]
           [name (ref module 'name)])
       (cond ((eq? type 'npsv-inmem)  (format fp "~A [shape = box]\n" name))
-            ((eq? type 'npsv-outmem) (format fp "~A [shape = box]\n" name))
+            ((eq? type 'npsv-outmem) (format fp "~A [shape = box]\n" name))      
             (else 0)))))
-             
 
 (define ch->dot_edge
   (lambda (ch)
@@ -91,6 +115,7 @@
           [dst-module (ref ch 'dst)])
       (string-append (ref src-module 'name) " -> " (ref dst-module 'name)))))
           
+
 
 
 

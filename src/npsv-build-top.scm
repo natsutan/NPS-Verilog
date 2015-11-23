@@ -27,6 +27,11 @@
           (format fp "\t\t.~A(~A)\n" name wire)
           (format fp "\t\t.~A(~A),\n" name wire)))))
 
+(define write-inport-assign
+  (lambda (fp inport-name outport-name ch)
+    (let ([wire (string-append (ch->wire-prefix ch) outport-name)])
+      (format fp "\t\t.~A(~A),\n" inport-name wire))))
+
 
 (define make-wires-from-ch
   (lambda (ch)
@@ -43,6 +48,10 @@
 
 (define-method make-wire-from-dataport ((src-port <npsv-port>) (dst-port <npsv-port>) name)
   (make <npsv-wire> :name name :lsb 0 :msb (ref dst-port 'msb)))
+
+;; data port connection
+; 出力ポートは全ビットを出し、入力ポートで調整
+
 
 (define make-top-wires
   (lambda (top)
@@ -86,12 +95,8 @@
     (make-top-ports *top-inst*)
     (make-top-wires *top-inst*)
     (write-top-verilog odir *top-inst*)
-    
-    (dolist (m (ref *top-inst* 'module))
-            (make-verilog-file m))
-               
-    
-    
+;    (dolist (m (ref *top-inst* 'module))
+;            (make-verilog-file m))    
     (make-template *top-inst*)  
     (print *top-inst*)))
 

@@ -34,22 +34,24 @@
   (format #t "func ~A~%" (ref inst 'func))
   (format #t "fixed number W ~A I ~A~%" (ref inst 'W) (ref inst 'I)))
 
+;; TODO separate make-verilog-file
 (define make-rom-from-file
  (lambda (fname)
   (clear-global-parameters! *outmnem-parameters*)
   (load-setting-file fname)
-  (make-rom-instance
-    *npsv-module-name*
-    *npsv-min*
-    *npsv-max*
-    *npsv-adr-width*
-    *npsv-W*
-    *npsv-I*
-    *npsv-func*
-    *npsv-rtl-output-dir*
-    *npsv-testbench-output-dir*
-    *npsv-template-output-dir*
-   )))
+  (let ((inst (make-rom-instance
+               *npsv-module-name*
+               *npsv-min*
+               *npsv-max*
+               *npsv-adr-width*
+               *npsv-W*
+               *npsv-I*
+               *npsv-func*
+               *npsv-rtl-output-dir*
+               *npsv-testbench-output-dir*
+               *npsv-template-output-dir*)))
+    (make-verilog-file inst)
+    inst)))
 
 (define make-rom-instance
   (lambda (name min max adr-w W I func rtl-odir tb-odir temp-odir)
@@ -72,7 +74,34 @@
   0)
 
 
-             
+
+(define-method write-module-instantiation (fp (m <npsv-rom>) channels)
+  (let* ([name (ref m 'name)]
+         [input-ch (find (lambda (ch) (eq? (ref ch 'dst) m)) channels)]
+         [output-ch (find (lambda (ch) (eq? (ref ch 'src) m)) channels)]
+         [input-prefix (ch->wire-prefix input-ch)]
+         )
+    (format fp "\t~A ~A (\n" name name)
+    
+    
+    (write-common-connection fp)
+
+    (when (not input-ch)
+      (format #t "Error:no input ~A~%" name))
+    (write-inport-assign fp "vi" "vo" input-ch)
+    (write-inport-assign fp "fi" "fo" input-ch)
+    
+    
+    
+    
+    (when (not output-ch)
+      (format #t "Error:no output ~A~%" name))
+    (write-outport-assign fp "vo" output-ch)
+    (write-outport-assign fp "fo" output-ch)
+    (write-outport-assign fp "datao" output-ch :last-flag #t)
+    (format fp "\t);\n");
+    ))
+
 
 
 ;;; --------------------------------------------------------------------------------
