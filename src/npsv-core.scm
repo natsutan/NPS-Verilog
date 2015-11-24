@@ -27,6 +27,15 @@
 (define-class <npsv-fixed-port> (<npsv-port>)
   ((fixed-info :init-keyword :fixed-info)))
 
+(define-method ref-W ((p <npsv-port>))
+  (let ((fi (ref p 'fixed-info)))
+    (ref fi 'W)))
+
+(define-method ref-I ((p <npsv-port>))
+  (let ((fi (ref p 'fixed-info)))
+    (ref fi 'I)))
+
+
 (define-class <npsv-adr-port> (<npsv-port>)
   ())
 

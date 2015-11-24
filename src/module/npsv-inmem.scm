@@ -26,16 +26,18 @@
   (lambda (fname)
     (clear-global-parameters! *inmem-parameters*)
     (load-setting-file fname)
-    (make-inmem-instance
-     *npsv-module-name*
-     *npsv-data-num*
-     *npsv-init-file*
-     *npsv-W* *npsv-I*
-     *npsv-delta-T*
-     *npsv-rtl-output-dir*
-     *npsv-testbench-output-dir*
-     *npsv-template-output-dir*
-     )))
+    (let ((inst  (make-inmem-instance
+                  *npsv-module-name*
+                  *npsv-data-num*
+                  *npsv-init-file*
+                  *npsv-W* *npsv-I*
+                  *npsv-delta-T*
+                  *npsv-rtl-output-dir*
+                  *npsv-testbench-output-dir*
+                  *npsv-template-output-dir*
+                  )))
+      (make-verilog-file inst)
+      inst)))
 
 (define-method print-setting ((inst <npsv-inmem>))
   (next-method)

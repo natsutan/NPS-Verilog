@@ -2,6 +2,13 @@
   (export-all))
 
 ;;misc
+
+(define (copy-instance obj)
+  (rlet1 new (make (class-of obj))
+    (dolist [slot (class-slots (class-of obj))]
+      (set! (~ new (slot-definition-name slot))
+            (~ obj (slot-definition-name slot))))))
+
 (define quantize
   (lambda (x)
     (if (< x 0)
