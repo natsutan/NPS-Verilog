@@ -49,8 +49,9 @@
             (set! (ref connection 'dst-port) dst-port)
             (set! *ch* (cons connection *ch*)))
           (begin
-            (let* ([pconv (make-portconv src-port dst-port (make-pconv-name src dst))])
+            (let* ([pconv (make-portconv src-port dst-port (make-pconv-name src dst) (ref src 'rtl-output-dir))])
               (format #t "add portconv src:~A dst:~A~%" src dst)
+              (make-verilog-file pconv)
               (connect src pconv)
               (connect pconv dst)))))))
 

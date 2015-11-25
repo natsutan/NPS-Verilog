@@ -76,6 +76,53 @@
   (write-verilog-testbench-file inst (eval outmem-testbench-template (interaction-environment))))
 
 
+(define-method write-module-instantiation (fp (m <npsv-outmem>) channels)
+  (let* ([name (ref m 'name)]
+         [cpu-adr-name (outmem-cpu-adr-name name)]
+         [cpu-data-name (outmem-cpu-data-name name)]
+         [cpu-rd-name (outmem-cpu-rd-name name)]
+         [cpu-fo-name (outmem-cpu-fo-name name)]
+         [input-ch (find
+                     (lambda (ch)
+                       (eq? (ref ch 'dst) m))
+                     channels)]
+         )
+    
+    (format fp "\t~A ~A (\n" name name)
+    (write-common-connection fp)
+    (write-port-assign fp cpu-adr-name cpu-adr-name)
+    (write-port-assign fp cpu-data-name cpu-data-name)
+    (write-port-assign fp cpu-rd-name cpu-rd-name)
+    (write-port-assign fp cpu-fo-name cpu-fo-name)
+   
+    (when (not input-ch)
+      (format #t "Error:no input ~A~%" name))
+
+    (write-inport-assign fp "vi" "vo" input-ch)
+    (write-inport-assign fp "fi" "fo" input-ch)
+    (write-inport-assign fp "datai" "data_o" input-ch)
+
+
+    (format fp "\t);\n");
+    ))
+
+(define outmem-cpu-adr-name
+  (lambda (name)
+    (string-append name "_cpu_adr")))
+
+(define outmem-cpu-data-name
+  (lambda (name)
+    (string-append name "_cpu_data")))
+
+(define outmem-cpu-rd-name
+  (lambda (name)
+    (string-append name "_cpu_rd")))
+
+(define outmem-cpu-fo-name
+  (lambda (name)
+    (string-append name "_cpu_fo")))
+
+
 (define-method add-top-ports (top (inst <npsv-outmem>))
   (let ([name (ref inst 'name)]
         [W (ref inst 'W)]
