@@ -28,10 +28,12 @@
           (format fp "\t\t.~A(~A),\n" name wire)))))
 
 (define write-inport-assign
-  (lambda (fp inport-name outport-name ch)
-    (let ([wire (string-append (ch->wire-prefix ch) outport-name)])
-      (format fp "\t\t.~A(~A),\n" inport-name wire))))
-
+  (lambda (fp inport-name outport-name ch . last-opt)
+    (let ([wire (string-append (ch->wire-prefix ch) outport-name)]
+          [last (get-optional last-opt #f)])          
+      (if last
+          (format fp "\t\t.~A(~A)\n" inport-name wire)
+          (format fp "\t\t.~A(~A),\n" inport-name wire)))))
 
 (define make-wires-from-ch
   (lambda (ch)
@@ -52,12 +54,10 @@
 ;; data port connection
 ; 出力ポートは全ビットを出し、入力ポートで調整
 
-
 (define make-top-wires
   (lambda (top)
     (dolist (ch (ref top 'ch))
             (add-top-wires top (make-wires-from-ch ch)))))
-
     
 (define add-top-wires
   (lambda (inst wires)
@@ -117,7 +117,9 @@
 (define write-top-instances
   (lambda (fp top)
     (dolist (m (ref top 'module))
-            (write-module-instantiation fp m (ref top 'ch)))))
+            (begin
+              (write-module-instantiation fp m (ref top 'ch))
+              (write-cr fp)))))
 
 (define-method write-module-instantiation (fp (m <npsv-module>) channels)
   (format #t "Error:not implemented instantiaon ~A~%" (ref m 'name)))

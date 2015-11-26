@@ -91,9 +91,6 @@
     (write-inport-assign fp "vi" "vo" input-ch)
     (write-inport-assign fp "fi" "fo" input-ch)
     
-    
-    
-    
     (when (not output-ch)
       (format #t "Error:no output ~A~%" name))
     (write-outport-assign fp "vo" output-ch)
