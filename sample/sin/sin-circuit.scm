@@ -1,6 +1,3 @@
-(use slib)
-(require 'trace)
-
 (add-load-path "../../src/" :relative)
 (use npsv)
 
@@ -16,14 +13,11 @@
 ; wire connection
 (connect inp sinrom)
 (connect sinrom outp)
-;(print (npsv-get-top))
-;(print (npsv-get-modules))
 
-
+; output
 (make-all-rtl "./output/rtl")
-
-;(make-template (npsv-get-top))
-;(make-top-testbench)
+(make-initialize-file inp)
+(make-top-testbench "./output/tb")
 (make-dataflow)
 
 

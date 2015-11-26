@@ -1,9 +1,9 @@
 
 ; sample file
-(define *npsv-data-num* 32)    ; integer word length
-(define *npsv-W* 16)   ; total word length
+(define *npsv-data-num* 300)    ; 
+(define *npsv-W* 24)   ; total word length
 (define *npsv-I* 8)    ; integer word length
-(define *npsv-delta-T* 2)    ; integer word length
+(define *npsv-delta-T* 2)    ; dalta T
 
 (define *npsv-module-name* "inmem")
 (define *npsv-init-file* "./setting/data.dat")

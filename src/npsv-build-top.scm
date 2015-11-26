@@ -1,5 +1,5 @@
 (define-module npsv-build-top
-  (export make-top-rtl npsv-get-top))
+  (export make-all-rtl npsv-get-top make-top-testbench))
 
 (define *top-inst* '())
 
@@ -13,7 +13,6 @@
   ((name :init-keyword :name)
    (lsb :init-keyword :lsb :init-value 0)
    (msb :init-keyword :msb :init-value 0)))
-
 
 (define ch->wire-prefix
   (lambda (ch)
@@ -152,15 +151,113 @@
       (write-top-instances fp inst)
       
       (format fp "endmodule\n")
+      (close-verilog-file fp)
       )))
 
-    
+(define port->reg-or-wire
+  (lambda (p)
+    (let ([dir (ref p 'dir)]
+          [name (ref p 'name)]
+          [bit (bit-slice-str (ref p 'lsb) (ref p 'msb))]) 
+      (if (eq? dir 'input)
+          (format #f "reg ~A ~A" bit name)
+          (format #f "wire ~A ~A" bit name)))))
 
+
+(define write-registers-and-wires
+  (lambda (fp top)
+    (let ([ports (ref top 'ports)])
+      (dolist (p ports)
+              (format fp "\t~A;\n" (port->reg-or-wire p))))))
+
+(define write-clk
+  (lambda (fp)
+    (format fp "\tparameter PERIOD = 10.0;\n")
+    (format fp "\talways # (PERIOD/2) clk = !clk;\n")
+    (format fp "\tinitial begin \n")
+    (format fp "\t\tclk = 1;\n")
+    (format fp "\tend\n")))
+
+(define write-top-instance
+  (lambda (fp top)
+    (let ([name (ref top 'name)]
+          [ports (ref top 'ports)])
+      (format fp "\t~A U0 (\n" name)
+      (write-port-connection-with-same-name fp ports)
+      (format fp "\t);\n"))))
+
+(define write-port-connection-with-same-name
+  (lambda (fp ports)
+    (let* ([p (car ports)]
+           [name (ref p 'name)])
+      (if (= (length ports) 1)
+          (format fp "\t\t.~A(~A)\n" name name)
+          (begin
+            (format fp "\t\t.~A(~A).\n" name name)
+            (write-port-connection-with-same-name fp (cdr ports)))))))
+
+(define write-top-iniitial
+  (lambda (fp top)
+    (format fp 
+
+
+(define make-top-testbench
+  (lambda (dir)
+    (let* ([top *top-inst*]
+           [tb_name (string-append (ref top 'name) "_tb")]
+           [fp (open-verilog-file dir tb_name)])
+      (write-header fp tb_name)
+      (format fp "module ~A ();\n" tb_name)
+      (write-registers-and-wires fp top)
+      (write-cr fp)
+      (write-clk fp)
+      (write-cr fp)
+      (write-top-instance fp top)
+      (write-cr fp)
+      (write-top-iniitial fp top)
+      (write-cr fp)
+      (format fp "endmodule\n")
+      (close-verilog-file fp)
+    )))
 
 
 (provide "npsv-build-top")
 
 
 
+"
+  task cpu_wr_task;
+    input [ADR_WIDTH-1:0] adr;
+    input [DATA_WIDTH-1:0] data;
+    begin
+       @(posedge clk);
+       cpu_wr = 1;
+       cpu_adr = adr;
+       cpu_data = data;
+       @(posedge clk);
+       cpu_wr = 0;
+       @(posedge clk);
+    end
+  endtask
+
+
+  initial begin
+
+    #1 reset_x = 1; cpu_adr = 0; cpu_wr = 0; set = 0; start = 0; cpu_data = 0;
+    # (PERIOD * 3)  reset_x = 0;
+    # (PERIOD * 5)  reset_x = 1;
+
+    `include "sample_init.v"
+
+    # (PERIOD * 3) set = 1;
+    # (PERIOD) set = 0;
+    # (PERIOD * 3) start = 1;
+    # (PERIOD) start = 0;
+    
+    @(posedge fo)
+    
+    # (PERIOD * 10)  $finish();
+  end
+"
 
 
