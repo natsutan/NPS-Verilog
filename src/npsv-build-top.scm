@@ -196,10 +196,64 @@
             (format fp "\t\t.~A(~A).\n" name name)
             (write-port-connection-with-same-name fp (cdr ports)))))))
 
+(define write-host-wr-task
+  (lambda (fp top)
+    (define host-wr-string
+      (lambda (m)
+        (let* ([name (ref m 'name)]
+               [cpu-adr-name (inmem-cpu-adr-name name)]
+               [cpu-data-name (inmem-cpu-data-name name)]
+               [cpu-wr-name (inmem-cpu-wr-name name)]
+               [adr-w (datanum->adr-w (ref m 'data-num))]
+               [data-w (ref m 'W)])
+          (format fp "\ttask ~A_wr_task\n" name)
+          (format fp "\t\tinput [~A:0] adr;\n" (- adr-w 1))
+          (format fp "\t\tinput [~A:0] data;\n" (- data-w 1))
+          (format fp "\t\tbegin\n")
+          (format fp "\t\t\t@(posedge clk);\n")
+          (format fp "\t\t\t~A = 1;\n"  cpu-wr-name)
+          (format fp "\t\t\t~A = adr\n" cpu-adr-name)
+          (format fp "\t\t\t~A = data\n" cpu-data-name)
+          (format fp "\t\t\t@(posedge clk);\n")
+          (format fp "\t\t\t~A = 0;\n"  cpu-wr-name)
+          (format fp "\t\t\t@(posedge clk);\n")
+          (format fp "\t\tend\n")
+          (format fp "\tendtask\n")
+          
+          )))
+    (map host-wr-string (filter (lambda (m) (eq? (class-of m) <npsv-inmem>)) (ref top 'module)))))
+
+
+
 (define write-top-iniitial
   (lambda (fp top)
-    (format fp 
+    (let ([inmems (filter (lambda (m) (eq? (class-of m) <npsv-inmem>)) (ref top 'module))])
+      
+      (format fp "\tinitial begin\n")
+      (format fp "\t\t#1 reset_x = 1; set = 0; start = 0;\n")
 
+      (dolist (m inmems)
+              (let ([name (ref m 'name)])
+                (format fp "\t\t~A = 0; ~A = 0; ~A = 0;\n" (inmem-cpu-adr-name name) (inmem-cpu-data-name name) (inmem-cpu-wr-name name))))
+      
+      (format fp "\t\t# (PERIOD * 3)  reset_x = 0;\n")
+      (format fp "\t\t# (PERIOD * 5)  reset_x = 1;\n")
+
+      (dolist (m inmems)
+              (format fp "\t\t`include \"~A\";\n" (ref m 'init-file)))
+      
+      (format fp "\t\t# (PERIOD * 3) set = 1;\n")
+      (format fp "\t\t# (PERIOD) set = 0;\n")
+      (format fp "\t\t# (PERIOD * 3) start = 1;\n")
+      (format fp "\t\t# (PERIOD) start = 0;\n")
+      
+      (format fp "\t\t@(posedge fo)\n")
+      
+      (format fp "\t\t# (PERIOD * 10)\n")
+      (format fp "\t\t$display(\"finish\");\n")
+      (format fp "\t\t$finish();\n")
+      (format fp "\tend\n"))))
+      
 
 (define make-top-testbench
   (lambda (dir)
@@ -214,6 +268,8 @@
       (write-cr fp)
       (write-top-instance fp top)
       (write-cr fp)
+      (write-host-wr-task fp top)
+      (write-cr fp)
       (write-top-iniitial fp top)
       (write-cr fp)
       (format fp "endmodule\n")
@@ -224,40 +280,5 @@
 (provide "npsv-build-top")
 
 
-
-"
-  task cpu_wr_task;
-    input [ADR_WIDTH-1:0] adr;
-    input [DATA_WIDTH-1:0] data;
-    begin
-       @(posedge clk);
-       cpu_wr = 1;
-       cpu_adr = adr;
-       cpu_data = data;
-       @(posedge clk);
-       cpu_wr = 0;
-       @(posedge clk);
-    end
-  endtask
-
-
-  initial begin
-
-    #1 reset_x = 1; cpu_adr = 0; cpu_wr = 0; set = 0; start = 0; cpu_data = 0;
-    # (PERIOD * 3)  reset_x = 0;
-    # (PERIOD * 5)  reset_x = 1;
-
-    `include "sample_init.v"
-
-    # (PERIOD * 3) set = 1;
-    # (PERIOD) set = 0;
-    # (PERIOD * 3) start = 1;
-    # (PERIOD) start = 0;
-    
-    @(posedge fo)
-    
-    # (PERIOD * 10)  $finish();
-  end
-"
 
 
