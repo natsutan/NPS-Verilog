@@ -80,8 +80,8 @@
      "\n"
      "\t// convert offset binary\n"
      (format #f "\twire [~A:0] tmp;\n" src-w)
-     (format #f "\tassign tmp = ~A + ~A;\n" src-name offset)
-     (format #f "\tassign ~A = tmp[~A:~A];~%" dst-name src-w (- src-w dst-w)))))
+     (format #f "\tassign tmp = datai + ~A;\n" offset)
+     (format #f "\tassign datao = tmp[~A:~A];~%" src-w (- src-w dst-w)))))
     
         
 

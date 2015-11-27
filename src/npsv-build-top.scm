@@ -126,7 +126,7 @@
 (define write-common-connection
   (lambda (fp)
     (format fp "\t\t.clk(clk),\n")
-    (format fp "\t\t.reset(reset),\n")
+    (format fp "\t\t.reset_x(reset_x),\n")
     (format fp "\t\t.set(set),\n")
     (format fp "\t\t.start(start),\n")))
 
@@ -142,6 +142,7 @@
     (let* ([name (ref inst 'name)]
            [fp (open-verilog-file dir name)])
       (write-header fp name)
+      (format fp "/* verilator lint_off SYMRSVDWORD */\n")
       (format fp "module ~A\n" name)
       (format fp "(\n")
       (write-top-ports fp (ref inst 'ports))
@@ -193,7 +194,7 @@
       (if (= (length ports) 1)
           (format fp "\t\t.~A(~A)\n" name name)
           (begin
-            (format fp "\t\t.~A(~A).\n" name name)
+            (format fp "\t\t.~A(~A),\n" name name)
             (write-port-connection-with-same-name fp (cdr ports)))))))
 
 (define write-host-wr-task
@@ -206,14 +207,14 @@
                [cpu-wr-name (inmem-cpu-wr-name name)]
                [adr-w (datanum->adr-w (ref m 'data-num))]
                [data-w (ref m 'W)])
-          (format fp "\ttask ~A_wr_task\n" name)
+          (format fp "\ttask ~A_wr_task;\n" name)
           (format fp "\t\tinput [~A:0] adr;\n" (- adr-w 1))
           (format fp "\t\tinput [~A:0] data;\n" (- data-w 1))
           (format fp "\t\tbegin\n")
           (format fp "\t\t\t@(posedge clk);\n")
           (format fp "\t\t\t~A = 1;\n"  cpu-wr-name)
-          (format fp "\t\t\t~A = adr\n" cpu-adr-name)
-          (format fp "\t\t\t~A = data\n" cpu-data-name)
+          (format fp "\t\t\t~A = adr;\n" cpu-adr-name)
+          (format fp "\t\t\t~A = data;\n" cpu-data-name)
           (format fp "\t\t\t@(posedge clk);\n")
           (format fp "\t\t\t~A = 0;\n"  cpu-wr-name)
           (format fp "\t\t\t@(posedge clk);\n")
@@ -226,7 +227,7 @@
 
 
 (define write-top-iniitial
-  (lambda (fp top)
+  (lambda (fp top dir)
     (let ([inmems (filter (lambda (m) (eq? (class-of m) <npsv-inmem>)) (ref top 'module))])
       
       (format fp "\tinitial begin\n")
@@ -240,7 +241,7 @@
       (format fp "\t\t# (PERIOD * 5)  reset_x = 1;\n")
 
       (dolist (m inmems)
-              (format fp "\t\t`include \"~A\";\n" (ref m 'init-file)))
+                (format fp "\t\t`include \"~A_init.v\";\n" (ref m 'name)))
       
       (format fp "\t\t# (PERIOD * 3) set = 1;\n")
       (format fp "\t\t# (PERIOD) set = 0;\n")
@@ -270,7 +271,7 @@
       (write-cr fp)
       (write-host-wr-task fp top)
       (write-cr fp)
-      (write-top-iniitial fp top)
+      (write-top-iniitial fp top dir)
       (write-cr fp)
       (format fp "endmodule\n")
       (close-verilog-file fp)

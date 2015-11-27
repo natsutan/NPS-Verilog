@@ -90,17 +90,18 @@
     
     (format fp "\t~A ~A (\n" name name)
     (write-common-connection fp)
-    (write-port-assign fp cpu-adr-name cpu-adr-name)
-    (write-port-assign fp cpu-data-name cpu-data-name)
-    (write-port-assign fp cpu-rd-name cpu-rd-name)
-    (write-port-assign fp cpu-fo-name cpu-fo-name)
-   
+    (write-port-assign fp "cpu_adr" cpu-adr-name)
+    (write-port-assign fp "cpu_data" cpu-data-name)
+    (write-port-assign fp "cpu_rd" cpu-rd-name)
+    (write-port-assign fp "fo" cpu-fo-name)
+    (write-port-assign fp "vo" "")
+    
     (when (not input-ch)
       (format #t "Error:no input ~A~%" name))
 
     (write-inport-assign fp "vi" "vo" input-ch)
     (write-inport-assign fp "fi" "fo" input-ch)
-    (write-inport-assign fp "datai" "data_o" input-ch)
+    (write-inport-assign fp "datai" "datao" input-ch :last-flag #t)
 
 
     (format fp "\t);\n");
@@ -131,7 +132,7 @@
     (add-port top (make <npsv-port> :name (string-append name "_cpu_adr") :dir 'input :lsb 0 :msb (- adr_w 1)))
     (add-port top (make <npsv-port> :name (string-append name "_cpu_data") :dir 'output :lsb 0 :msb (- W 1)))
     (add-port top (make <npsv-port> :name (string-append name "_cpu_rd") :dir 'input))
-    (add-port top (make <npsv-port> :name (string-append name "_fo") :dir 'output))
+    (add-port top (make <npsv-port> :name (string-append name "_cpu_fo") :dir 'output))
   
   ))
 
@@ -158,7 +159,7 @@
  input 			     cpu_rd			     
   
 );
-  reg [ADR_WIDTH:0] 	     adr_cnt;
+  reg [ADR_WIDTH-1:0] 	     adr_cnt;
   reg [DATA_WIDTH-1:0] mem [0:DATA_NUM-1];
 
   // CPU read

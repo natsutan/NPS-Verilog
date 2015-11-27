@@ -78,14 +78,14 @@
   (write-verilog-file inst (eval inmem-rtl-template (interaction-environment))))
 
 (define read-write-initialize-file
-  (lambda (fpi fpo W I adr)
+  (lambda (fpi fpo name W I adr)
     (let ((buf (read-line fpi)))
       (when (not (eof-object? buf))
         (let ((n (string->number buf)))
           (when n              
             (let ((s (toFix n W I)))
-              (format fpo "\tcpu_wr_task(~A,~A);  // ~A~%" adr s buf)
-              (read-write-initialize-file fpi fpo W I (+ adr 1)))))))))
+              (format fpo "\t~A_wr_task(~A,~A);  // ~A~%" name adr s buf)
+              (read-write-initialize-file fpi fpo name W I (+ adr 1)))))))))
 
 (define write-initialize-file-header
   (lambda (fp name W I )
@@ -104,7 +104,7 @@
     (format #t "open ~A (read) ~%" initfilename)
     (format #t "open ~A~%" (string-append name "_init"))
     (write-initialize-file-header fpo name W I)
-    (read-write-initialize-file fpi fpo W I 0)
+    (read-write-initialize-file fpi fpo name W I 0)
     (close-verilog-file fpo)
     (close-input-port fpi)
       ))
@@ -147,9 +147,9 @@
          )
     (format fp "\t~A ~A (\n" name name)
     (write-common-connection fp)
-    (write-port-assign fp cpu-adr-name cpu-adr-name)
-    (write-port-assign fp cpu-data-name cpu-data-name)
-    (write-port-assign fp cpu-wr-name cpu-wr-name) 
+    (write-port-assign fp "cpu_adr" cpu-adr-name)
+    (write-port-assign fp "cpu_data" cpu-data-name)
+    (write-port-assign fp "cpu_wr" cpu-wr-name) 
     (when (not output-ch)
       (format #t "Error:no output ~A~%" name))
 
@@ -181,7 +181,7 @@
  input 			     cpu_wr			     
   
 );
-  reg [ADR_WIDTH:0] 	     adr_cnt;
+  reg [ADR_WIDTH-1:0] 	     adr_cnt;
   reg [DELTA_WIDTH:0] 	     delta_cnt;
   reg 			     delta_cnt_en;
   reg 			     en;
@@ -197,7 +197,7 @@
   // mem read
   always @ (posedge clk or negedge reset_x) begin
     if(reset_x == 1'b0)begin
-      datao <= DATA_WIDTH-1'd0;
+      datao <= {DATA_WIDTH{1'b0}};
     end else begin
       if(adr_cnt<DATA_NUM)begin
 	datao <= mem[adr_cnt];
@@ -322,7 +322,7 @@ module ~|*npsv-module-name*|_tb();
      .cpu_wr(cpu_wr)
      );
 
-  task cpu_wr_task;
+  task ~|*npsv-module-name*|_wr_task;
     input [ADR_WIDTH-1:0] adr;
     input [DATA_WIDTH-1:0] data;
     begin

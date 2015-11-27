@@ -90,6 +90,7 @@
       (format #t "Error:no input ~A~%" name))
     (write-inport-assign fp "vi" "vo" input-ch)
     (write-inport-assign fp "fi" "fo" input-ch)
+    (write-inport-assign fp "datai" "datao" input-ch)
     
     (when (not output-ch)
       (format #t "Error:no output ~A~%" name))
