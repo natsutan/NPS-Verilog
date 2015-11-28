@@ -67,4 +67,12 @@
       (format fp "\t);~%")
       (close-verilog-file fp))))
 
+(define dec->verilolg-hex-str
+  (lambda (d bit)
+    (let* ([dispwidth (* (exact (ceiling (/ bit 8))) 2)]
+           [val-str (number->string (logand (- (power 2 bit) 1) d) 16)]
+           )      
+      (format #f (string-append "~A'h~" (x->string dispwidth) ",,,'0@A") bit val-str))))
+
+
 (provide "npsv-verilog")
