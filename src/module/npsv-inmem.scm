@@ -83,7 +83,7 @@
       (when (not (eof-object? buf))
         (let ((n (string->number buf)))
           (when n              
-            (let ((s (toFix n W I)))
+            (let ((s (dec->verilolg-hex-str (toFix n W I) W)))
               (format fpo "\t~A_wr_task(~A,~A);  // ~A~%" name adr s buf)
               (read-write-initialize-file fpi fpo name W I (+ adr 1)))))))))
 
