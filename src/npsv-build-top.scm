@@ -225,10 +225,21 @@
     (map host-wr-string (filter (lambda (m) (eq? (class-of m) <npsv-inmem>)) (ref top 'module)))))
 
 
+(define all-finish-str
+  (lambda (outmems)
+    (if (= (length outmems) 1)
+        (outmem-cpu-fo-name (ref (car outmems) 'name))
+        (string-append "& " (outmem-cpu-fo-name (ref outmems 'name)) (all-finish-str (cdr outmems))))))
+
 
 (define write-top-iniitial
   (lambda (fp top dir)
-    (let ([inmems (filter (lambda (m) (eq? (class-of m) <npsv-inmem>)) (ref top 'module))])
+    (let ([inmems (filter (lambda (m) (eq? (class-of m) <npsv-inmem>)) (ref top 'module))]
+          [outmems (filter (lambda (m) (eq? (class-of m) <npsv-outmem>)) (ref top 'module))]
+          )
+      (format fp "\twire finish_all;\n");
+      (format fp "\tassign finish_all = ~A;\n" (all-finish-str outmems))
+      (format fp "\n")
       
       (format fp "\tinitial begin\n")
       (format fp "\t\t#1 reset_x = 1; set = 0; start = 0;\n")
@@ -241,14 +252,15 @@
       (format fp "\t\t# (PERIOD * 5)  reset_x = 1;\n")
 
       (dolist (m inmems)
-                (format fp "\t\t`include \"~A_init.v\";\n" (ref m 'name)))
+                (format fp "\t\t`include \"~A_init.v\"\n" (ref m 'name)))
       
       (format fp "\t\t# (PERIOD * 3) set = 1;\n")
       (format fp "\t\t# (PERIOD) set = 0;\n")
       (format fp "\t\t# (PERIOD * 3) start = 1;\n")
+      (format fp "\t\t$display(\"start\");\n")
       (format fp "\t\t# (PERIOD) start = 0;\n")
-      
-      (format fp "\t\t@(posedge fo)\n")
+
+      (format fp "\t\t@(posedge finish_all)\n")
       
       (format fp "\t\t# (PERIOD * 10)\n")
       (format fp "\t\t$display(\"finish\");\n")
