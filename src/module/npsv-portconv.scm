@@ -74,13 +74,13 @@
          [dst-name (ref dst 'name)]
          [src-w (ref-W src)]
          [dst-w (ref dst 'msb)]
-         [offset (power 2 src-w)]
+         [offset (power 2 (- src-w 1))]
          )
     (string-append
      "\n"
      "\t// convert offset binary\n"
      (format #f "\twire [~A:0] tmp;\n" src-w)
-     (format #f "\tassign tmp = datai + ~A;\n" offset)
+     (format #f "\tassign tmp = {datai[~A], datai} + ~A;\n" (- src-w 1) (dec->verilolg-hex-str offset src-w))
      (format #f "\tassign datao = tmp[~A:~A];~%" src-w (- src-w dst-w)))))
     
         
