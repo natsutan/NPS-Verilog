@@ -1,15 +1,15 @@
 # NPS-outmem
-o—Íƒf[ƒ^—pƒƒ‚ƒŠ
+å‡ºåŠ›ãƒ‡ãƒ¼ã‚¿ç”¨ãƒ¡ãƒ¢ãƒª
 
-# İ’èƒpƒ‰ƒ[ƒ^
+# è¨­å®šãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
 
-- \*npsv-data-num\* o—Íƒf[ƒ^‚Ìƒf[ƒ^”
-- \*npsv-W\* ƒf[ƒ^‘S‘Ì‚Ìƒrƒbƒg•
-- \*npsv-I\* ƒf[ƒ^‚Ì®”•”‚Ìƒrƒbƒg•
-- \*npsv-module-name\* ƒ‚ƒWƒ…[ƒ‹–¼
-- \*npsv-rtl-output-dir\* rtlo—ÍƒfƒBƒŒƒNƒgƒŠi‘Š‘ÎƒpƒXj
-- \*npsv-testbench-output-dir\* ƒeƒXƒgƒxƒ“ƒ`o—ÍƒfƒBƒŒƒNƒgƒŠi‘Š‘ÎƒpƒXj
-- \*npsv-template-output-dir\* ƒeƒ“ƒvƒŒ[ƒgo—ÍƒfƒBƒŒƒNƒgƒŠi‘Š‘ÎƒpƒXj
+- \*npsv-data-num\* å‡ºåŠ›ãƒ‡ãƒ¼ã‚¿ã®ãƒ‡ãƒ¼ã‚¿æ•°
+- \*npsv-W\* ãƒ‡ãƒ¼ã‚¿å…¨ä½“ã®ãƒ“ãƒƒãƒˆå¹…
+- \*npsv-I\* ãƒ‡ãƒ¼ã‚¿ã®æ•´æ•°éƒ¨ã®ãƒ“ãƒƒãƒˆå¹…
+- \*npsv-module-name\* ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«å
+- \*npsv-rtl-output-dir\* rtlå‡ºåŠ›ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªï¼ˆç›¸å¯¾ãƒ‘ã‚¹ï¼‰
+- \*npsv-testbench-output-dir\* ãƒ†ã‚¹ãƒˆãƒ™ãƒ³ãƒå‡ºåŠ›ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªï¼ˆç›¸å¯¾ãƒ‘ã‚¹ï¼‰
+- \*npsv-template-output-dir\* ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆå‡ºåŠ›ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªï¼ˆç›¸å¯¾ãƒ‘ã‚¹ï¼‰
 
 
 ```scheme
@@ -24,23 +24,23 @@
 ```
 
 
-# “üo—Í
+# å…¥å‡ºåŠ›
+| åå‰ | ãƒ“ãƒƒãƒˆå¹… | æ–¹å‘ | æ©Ÿèƒ½ |
+| ------------- | -------------| ----- |---- | 
+|clk||input|ã‚¯ãƒ­ãƒƒã‚¯|
+|reset_x||input|ãƒªã‚»ãƒƒãƒˆï¼ˆè² è«–ç†ï¼‰|
+|start||input|å‡¦ç†é–‹å§‹ã‚¿ã‚¤ãƒŸãƒ³ã‚°|
+|set||input|è¨­å®šå€¤ã®åæ˜ ã‚¿ã‚¤ãƒŸãƒ³ã‚°ï¼ˆæœªä½¿ç”¨ï¼‰|
+|vi||output|validå…¥åŠ›|
+|fi||output|å‡¦ç†ã®çµ‚äº†é€šçŸ¥|
+|vo||output|validå‡ºåŠ›|
+|fo||output|å‡¦ç†ã®çµ‚äº†é€šçŸ¥|
+|datai|\*npsv-W\*|ãƒ‡ãƒ¼ã‚¿å‡ºåŠ›ï¼ˆå›ºå®šå°æ•°ç‚¹æ•°ï¼‰|
+|cpu_adr|\*npsv-data-num\*ã‹ã‚‰è¨ˆç®—|input|cpuã‹ã‚‰ã®èª­ã¿å‡ºã—ã‚¢ãƒ‰ãƒ¬ã‚¹|
+|cpu_data|\*npsv-W\*|output|cpuã‹ã‚‰ã®èª­ã¿å‡ºã—ãƒ‡ãƒ¼ã‚¿|
+|cpu_rd||input|cpuã‹ã‚‰ã®ãƒªãƒ¼ãƒ‰ä¿¡å·|
 
-|–¼‘O|ƒrƒbƒg•|•ûŒü|‹@”\|
-|clk||input|ƒNƒƒbƒN|
-|reset_x||input|ƒŠƒZƒbƒgi•‰˜_—j|
-|start||input|ˆ—ŠJnƒ^ƒCƒ~ƒ“ƒO|
-|set||input|İ’è’l‚Ì”½‰fƒ^ƒCƒ~ƒ“ƒOi–¢g—pj|
-|vi||output|valid“ü—Í|
-|fi||output|ˆ—‚ÌI—¹’Ê’m|
-|vo||output|valido—Í|
-|fo||output|ˆ—‚ÌI—¹’Ê’m|
-|datai|\*npsv-W\*|ƒf[ƒ^o—ÍiŒÅ’è¬”“_”j|
-|cpu_adr|\*npsv-data-num\*‚©‚çŒvZ|input|cpu‚©‚ç‚Ì“Ç‚İo‚µƒAƒhƒŒƒX|
-|cpu_data|\*npsv-W\|output|cpu‚©‚ç‚Ì“Ç‚İo‚µƒf[ƒ^|
-|cpu_rd||input|cpu‚©‚ç‚ÌƒŠ[ƒhM†|
-
-# ƒTƒ“ƒvƒ‹o—Í
+# ã‚µãƒ³ãƒ—ãƒ«å‡ºåŠ›
 
 [sinrom.v](https://github.com/natsutan/nromgen/blob/master/output/rtl/sinrom.v "sinrom.v")
 
