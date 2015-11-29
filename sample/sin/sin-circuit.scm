@@ -3,7 +3,6 @@
 
 ; initialize
 (npsv-initialize! "npsv_top")
-(print (npsv-get-topname))
 
 ; instancation
 (define inp (make-inmem-from-file "./setting/inmem.scm"))

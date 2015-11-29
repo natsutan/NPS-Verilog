@@ -123,6 +123,19 @@
   (lambda (name)
     (string-append name "_cpu_fo")))
 
+(define outmem-dump-str
+  (lambda (inst instname)
+    (let ([name (ref inst 'name)]
+          [num  (ref inst 'data-num)])
+      (string-append
+       (format #f "\t\t$writememh(\"~A_dump.dat\", ~A.mem, 0, ~A);\n" name instname (- num 1))
+       (format #f "\t\tfp =$fopen(\"~A_dump.txt\");\n" name)
+       (format #f "\t\tfor(i=0;i<~A;i=i+1)begin\n" num)
+       (format #f "\t\t\t~A_rd_task(i);\n" name)
+       (format #f "\t\t\t$fwrite(fp, \"%f\\n\", ~A_rd_data / (2.0 ** (~A - ~A - 1)));\n"
+               name (ref inst 'W) (ref inst 'I))
+       (format #f  "\t\tend\n")
+       (format #f  "\t\t$fclose(fp);\n")))))
 
 (define-method add-top-ports (top (inst <npsv-outmem>))
   (let ([name (ref inst 'name)]
@@ -130,7 +143,7 @@
         [I (ref inst 'I)]
         [adr_w (datanum->adr-w (ref inst 'data-num))])
     (add-port top (make <npsv-port> :name (string-append name "_cpu_adr") :dir 'input :lsb 0 :msb (- adr_w 1)))
-    (add-port top (make <npsv-port> :name (string-append name "_cpu_data") :dir 'output :lsb 0 :msb (- W 1)))
+    (add-port top (make <npsv-port> :name (string-append name "_cpu_data") :dir 'output :lsb 0 :msb (- W 1) :signed #t))
     (add-port top (make <npsv-port> :name (string-append name "_cpu_rd") :dir 'input))
     (add-port top (make <npsv-port> :name (string-append name "_cpu_fo") :dir 'output))
   

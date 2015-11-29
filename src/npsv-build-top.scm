@@ -159,10 +159,11 @@
   (lambda (p)
     (let ([dir (ref p 'dir)]
           [name (ref p 'name)]
+          [sig-str (if (ref p 'signed) "signed " "")]
           [bit (bit-slice-str (ref p 'lsb) (ref p 'msb))]) 
       (if (eq? dir 'input)
-          (format #f "reg ~A ~A" bit name)
-          (format #f "wire ~A ~A" bit name)))))
+          (format #f "reg ~A~A ~A" sig-str bit name)
+          (format #f "wire ~A~A ~A" sig-str bit name)))))
 
 
 (define write-registers-and-wires
@@ -220,9 +221,34 @@
           (format fp "\t\t\t@(posedge clk);\n")
           (format fp "\t\tend\n")
           (format fp "\tendtask\n")
-          
           )))
     (map host-wr-string (filter (lambda (m) (eq? (class-of m) <npsv-inmem>)) (ref top 'module)))))
+
+(define write-host-rd-task
+  (lambda (fp top)
+    (define host-rd-string
+      (lambda (m)
+        (let* ([name (ref m 'name)]
+               [cpu-adr-name (outmem-cpu-adr-name name)]
+               [cpu-data-name (outmem-cpu-data-name name)]
+               [cpu-rd-name (outmem-cpu-rd-name name)]
+               [adr-w (datanum->adr-w (ref m 'data-num))]
+               [data-w (ref m 'W)])
+          (format fp "\treg signed [~A:0] ~A_rd_data;\n" data-w name)
+          
+          (format fp "\ttask ~A_rd_task;\n" name)
+          (format fp "\t\tinput [~A:0] adr;\n" (- adr-w 1))
+          (format fp "\t\tbegin\n")
+          (format fp "\t\t\t@(posedge clk);\n")
+          (format fp "\t\t\t~A = adr;\n" cpu-adr-name)
+          (format fp "\t\t\t~A = 1;\n" cpu-rd-name)
+          (format fp "\t\t\t@(posedge clk);\n")
+          (format fp "\t\t\t@(posedge clk);\n")
+          (format fp "\t\t\t~A_rd_data = ~A;\n" name cpu-data-name)
+          (format fp "\t\tend\n")
+          (format fp "\tendtask\n")
+          )))
+    (map host-rd-string (filter (lambda (m) (eq? (class-of m) <npsv-outmem>)) (ref top 'module)))))
 
 
 (define all-finish-str
@@ -239,6 +265,8 @@
           )
       (format fp "\twire finish_all;\n");
       (format fp "\tassign finish_all = ~A;\n" (all-finish-str outmems))
+      (format fp "\tinteger i;\n")
+      (format fp "\tinteger fp;\n")
       (format fp "\n")
       
       (format fp "\tinitial begin\n")
@@ -247,6 +275,9 @@
       (dolist (m inmems)
               (let ([name (ref m 'name)])
                 (format fp "\t\t~A = 0; ~A = 0; ~A = 0;\n" (inmem-cpu-adr-name name) (inmem-cpu-data-name name) (inmem-cpu-wr-name name))))
+      (dolist (m outmems)
+              (let ([name (ref m 'name)])
+                (format fp "\t\t~A = 0; ~A = 0\n;" (outmem-cpu-adr-name name) (outmem-cpu-rd-name name))))
       
       (format fp "\t\t# (PERIOD * 3)  reset_x = 0;\n")
       (format fp "\t\t# (PERIOD * 5)  reset_x = 1;\n")
@@ -259,19 +290,27 @@
       (format fp "\t\t# (PERIOD * 3) start = 1;\n")
       (format fp "\t\t$display(\"start\");\n")
       (format fp "\t\t# (PERIOD) start = 0;\n")
-
+      (format fp "\n")
       (format fp "\t\t@(posedge finish_all)\n")
+
+      (dolist (m outmems)
+              (let* ([inst-name (string-append (tb_name top) ".U0." (ref m 'name))]
+                     [dump-str (outmem-dump-str m inst-name)])
+                (format fp "~A\n" dump-str)))
       
       (format fp "\t\t# (PERIOD * 10)\n")
       (format fp "\t\t$display(\"finish\");\n")
       (format fp "\t\t$finish();\n")
       (format fp "\tend\n"))))
-      
+
+(define tb_name
+  (lambda (top)
+    (string-append (ref top 'name) "_tb")))
 
 (define make-top-testbench
   (lambda (dir)
     (let* ([top *top-inst*]
-           [tb_name (string-append (ref top 'name) "_tb")]
+           [tb_name (tb_name top)]
            [fp (open-verilog-file dir tb_name)])
       (write-header fp tb_name)
       (format fp "module ~A ();\n" tb_name)
@@ -282,6 +321,8 @@
       (write-top-instance fp top)
       (write-cr fp)
       (write-host-wr-task fp top)
+      (write-cr fp)
+      (write-host-rd-task fp top)
       (write-cr fp)
       (write-top-iniitial fp top dir)
       (write-cr fp)

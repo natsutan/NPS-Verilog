@@ -81,16 +81,11 @@
      "\t// convert offset binary\n"
      (format #f "\twire [~A:0] tmp;\n" src-w)
      (format #f "\tassign tmp = {datai[~A], datai} + ~A;\n" (- src-w 1) (dec->verilolg-hex-str offset src-w))
-     (format #f "\tassign datao = tmp[~A:~A];~%" src-w (- src-w dst-w)))))
+     (format #f "\tassign datao = tmp[~A:~A];~%" (- src-w 1) (- src-w dst-w 1)))))
     
-        
-
-
 (define make-pconv-name
   (lambda (src dst)
     (string-append "pconv_" (ref src 'name) "_to_" (ref dst 'name))))
-
-    
 
 (define-method write-module-instantiation (fp (m <npsv-portconv>) channels)
   (let* ([name (ref m 'name)]

@@ -22,6 +22,7 @@
    (comment :init-keyword :comment :init-value "")
    (type :init-keyword :type :init-value 'signal)
    (ch :init-keyword :ch :init-value 0)
+   (signed :init-keyword :signed :init-value #f)
    ))
 
 (define-class <npsv-fixed-port> (<npsv-port>)
