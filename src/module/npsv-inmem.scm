@@ -48,7 +48,6 @@
   (print-setting-dirs inst)
   )
 
-
 (define make-inmem-instance
   (lambda (name data-num init-file W I delta rtl-odir tb-odir temp-odir)
     (let ([inst (make <npsv-inmem> :name name :type 'npsv-inmem :comment "input memory module"
@@ -92,7 +91,6 @@
     (write-header fp name)
     (format fp "// W = ~A, I = ~A~%" W I)))
 
-
 (define-method make-initialize-file ((inst <npsv-inmem>))
   (let* ([name (ref inst 'name)]
          [initfilename (ref inst 'init-file)]
@@ -134,7 +132,6 @@
   (lambda (name)
     (string-append name "_cpu_wr")))
 
-
 (define-method write-module-instantiation (fp (m <npsv-inmem>) channels)
   (let* ([name (ref m 'name)]
          [cpu-adr-name (inmem-cpu-adr-name name)]
@@ -158,8 +155,6 @@
     (write-outport-assign fp "datao" output-ch :last-flag #t)
     (format fp "\t);\n");
     ))
-
-
 
 ;;; --------------------------------------------------------------------------------
 ;;; verilog source

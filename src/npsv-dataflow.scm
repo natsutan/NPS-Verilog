@@ -1,4 +1,3 @@
-
 (use gauche.process)
 
 (define-module npsv-dataflow
@@ -7,7 +6,6 @@
 (define *ch* '())
 (define *top-name* "")
 (define *module* '())
-
   
 (define npsv-initialize!
   (lambda (topname)
@@ -30,7 +28,6 @@
   (lambda (module)
     (unless (member module *module*)
       (set! *module* (cons module *module*)))))
-
 
 (define connect
   (lambda (src dst)
@@ -56,7 +53,6 @@
               (connect pconv dst)))))))
 
 ;; compare port
-
 (define-method eqport? ((a <npsv-fixed-port>) (b <npsv-fixed-port>))
   (and (= (ref-W a) (ref-W b))
        (= (ref-I a) (ref-I b)))) 
@@ -65,12 +61,9 @@
   (and (= (ref a 'lsb) (ref b 'lsb))
        (= (ref a 'msb) (ref b 'msb)))) 
 
-
 ;; always false
 (define-method eqport? ((a <npsv-port>) (b <npsv-port>))
   #f)
-
-
 
 (define make-dataflow
   (lambda ()
@@ -116,8 +109,4 @@
           [dst-module (ref ch 'dst)])
       (string-append (ref src-module 'name) " -> " (ref dst-module 'name)))))
           
-
-
-
-
 (provide "npsv-dataflow")

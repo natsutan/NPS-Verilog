@@ -1,11 +1,9 @@
 (define-module npsv-portconv
   (export-all))
 
-
 (define-class <npsv-portconv> (<npsv-module>)
   ((src :init-keyword :src)
    (dst :init-keyword :dst)))
-        
 
 (define-method make-portconv ((src <npsv-fixed-port>) (dst <npsv-adr-port>) name dir)
   (let ([inst (make <npsv-portconv> :type 'npsv-portconv :name name :src src :dst dst
@@ -30,10 +28,8 @@
 
     inst))
 
-
 (define-method make-verilog-file ((inst <npsv-portconv>))
   (write-verilog-file inst (make-verilog-str inst)))
-
 
 (define make-verilog-str
   (lambda (inst)
@@ -51,7 +47,6 @@
      "endmodule\n"
     )))
 
-
 (define portconv-ports-str
   (lambda (ports)
     (let* ([p (car ports)]
@@ -63,11 +58,9 @@
           (cons (format #f "\t~A ~A ~A,~%" dir bit name)
                 (portconv-ports-str (cdr ports)))))))
      
-
 (define make-portconv-assign-str
   (lambda (inst)
     (portconv-assign-str (ref inst 'src) (ref inst 'dst))))
-
 
 (define-method portconv-assign-str ((src <npsv-fixed-port>) (dst <npsv-adr-port>))
   (let* ([src-name (ref src 'name)]
@@ -110,8 +103,6 @@
 
     (format fp "\t);\n");
     ))
-
-
 
 (provide "portconv")
 

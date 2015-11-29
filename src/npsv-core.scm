@@ -50,11 +50,6 @@
    (template-ouput-dir :init-keyword :template-ouput-dir)
    ))
 
-
-;(define-class <npsv-wire> ()
-;   ((name :init-keyword :name)
-;    (assign :init-keyword :assign)))
-
 (define-class <npsv-ch> ()
   ((src :init-keyword :src)
    (dst :init-keyword :dst)
@@ -97,16 +92,9 @@
 
 (define-method add-port ((inst <npsv-module>) (port <npsv-port>))
   (set! (ref inst 'ports) (append (ref inst 'ports) (cons port '()))))
-    
-;(define-method add-process ((inst <npsv-module>) (process <npsv-process>))
-;  (set! (ref inst 'processes) (cons process (ref inst 'processes))))
-    
-;(define-method add-wire ((inst <npsv-module>) (process <npsv-wire>))
-;  (set! (ref inst 'wires) (cons processes (ref inst 'wires))))
 
 (define-method print ((inst <npsv-module>))
   (print (string-concatenate  (list "<npsv-module> " (ref inst 'name) " (" (symbol->string (ref inst 'type)) ")" )))
-  ;(next-method)
   )
 
 (define-method print ((p <npsv-port>))
@@ -147,9 +135,6 @@
                       (string-append "[" (number->string msb) ":" (number->string lsb) "] "))))
       (string-append slise name))))
 
-
-
-
 (define-method print-setting ((inst <npsv-module>))
   (format #t "==== ~A ====~%" (ref inst 'type))
   (format #t "name ~A~%"  (ref inst 'name)))
@@ -159,7 +144,5 @@
     (format #t "output dir ~A~%" (ref inst 'rtl-output-dir))
     (format #t "testbench dir ~A~%" (ref inst 'testbench-output-dir))
     (format #t "template dir ~A~%" (ref inst 'template-ouput-dir))))
-
-
 
 (provide "npsv-core")

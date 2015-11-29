@@ -22,7 +22,6 @@
           (min (- (power 2 (- W 1)))))
       (let ((val_int (exact (values-ref (modf val) 1))))
         (clamp  (quantize val_int)  min  max)))))
-
     
 (define clear-global-parameters!
   (lambda (params)

@@ -1,4 +1,3 @@
-
 (define-module npsv-rom
   (export make-rom-from-file))
 
@@ -69,11 +68,8 @@
       (add-port inst (make <npsv-adr-port> :name "datai" :dir 'input :msb (- adr-w 1) :lsb 0 :type 'address))
       inst)))
 
-
 (define-method add-top-ports ((inst <npsv-rom>))
   0)
-
-
 
 (define-method write-module-instantiation (fp (m <npsv-rom>) channels)
   (let* ([name (ref m 'name)]
@@ -82,8 +78,6 @@
          [input-prefix (ch->wire-prefix input-ch)]
          )
     (format fp "\t~A ~A (\n" name name)
-    
-    
     (write-common-connection fp)
 
     (when (not input-ch)
@@ -100,13 +94,9 @@
     (format fp "\t);\n");
     ))
 
-
-
 ;;; --------------------------------------------------------------------------------
 ;;; make rom data
 ;;; --------------------------------------------------------------------------------
-
-
 (define make-data
   (lambda (inst)
     (let ([func (ref inst 'func)]
@@ -127,7 +117,6 @@
 ;;; --------------------------------------------------------------------------------
 ;;; verilog rtl
 ;;; --------------------------------------------------------------------------------
-
 (define romdata->string
   (lambda (data dataw)
     (let ((format (- (power 2 dataw) 1)))
@@ -148,7 +137,6 @@
 
 (define-method make-verilog-testbench-file ((inst <npsv-rom>))
   (write-verilog-testbench-file inst (eval rom-testbench-template (interaction-environment))))
-
 
 ;;; --------------------------------------------------------------------------------
 ;;; verilog source

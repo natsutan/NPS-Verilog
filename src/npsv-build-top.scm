@@ -50,9 +50,6 @@
 (define-method make-wire-from-dataport ((src-port <npsv-port>) (dst-port <npsv-port>) name)
   (make <npsv-wire> :name name :lsb 0 :msb (ref dst-port 'msb)))
 
-;; data port connection
-; 出力ポートは全ビットを出し、入力ポートで調整
-
 (define make-top-wires
   (lambda (top)
     (dolist (ch (ref top 'ch))
@@ -62,7 +59,6 @@
   (lambda (inst wires)
     (set! (ref inst 'wires)
           (concatenate (list wires (ref inst 'wires))))))
-
 
 (define make-top-module
   (lambda ()
@@ -250,13 +246,11 @@
           )))
     (map host-rd-string (filter (lambda (m) (eq? (class-of m) <npsv-outmem>)) (ref top 'module)))))
 
-
 (define all-finish-str
   (lambda (outmems)
     (if (= (length outmems) 1)
         (outmem-cpu-fo-name (ref (car outmems) 'name))
         (string-append "& " (outmem-cpu-fo-name (ref outmems 'name)) (all-finish-str (cdr outmems))))))
-
 
 (define write-top-iniitial
   (lambda (fp top dir)
@@ -329,7 +323,6 @@
       (format fp "endmodule\n")
       (close-verilog-file fp)
     )))
-
 
 (provide "npsv-build-top")
 

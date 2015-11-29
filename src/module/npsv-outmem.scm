@@ -38,8 +38,6 @@
     (make-verilog-file inst)
     inst)))
 
-
-
 (define make-outmem-instance
   (lambda (name data-num W I rtl-odir tb-odir temp-odir)
     (let ([inst (make <npsv-outmem>  :name name :type 'npsv-outmem :comment "output memory module"
@@ -66,15 +64,11 @@
       (add-port inst (make <npsv-port> :name "cpu_rd" :dir 'input))
       inst)))
 
-
-
-
 (define-method make-verilog-file ((inst <npsv-outmem>))
   (write-verilog-file inst (eval outmem-rtl-template (interaction-environment))))
 
 (define-method make-verilog-testbench-file ((inst <npsv-outmem>))
   (write-verilog-testbench-file inst (eval outmem-testbench-template (interaction-environment))))
-
 
 (define-method write-module-instantiation (fp (m <npsv-outmem>) channels)
   (let* ([name (ref m 'name)]
@@ -102,7 +96,6 @@
     (write-inport-assign fp "vi" "vo" input-ch)
     (write-inport-assign fp "fi" "fo" input-ch)
     (write-inport-assign fp "datai" "datao" input-ch :last-flag #t)
-
 
     (format fp "\t);\n");
     ))
