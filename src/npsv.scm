@@ -12,6 +12,7 @@
    npsv-inmem
    npsv-outmem
    npsv-rom
+   npsv-const
    npsv-portconv
    npsv-dataflow
    npsv-build-top
@@ -24,6 +25,7 @@
 (require "npsv-inmem")
 (require "npsv-outmem")
 (require "npsv-rom")
+(require "npsv-const")
 (require "npsv-portconv")
 (require "npsv-dataflow")
 (require "npsv-build-top")
