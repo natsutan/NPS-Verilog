@@ -1,19 +1,19 @@
 # NPS-inmem
-“ü—Íƒf[ƒ^—pƒƒ‚ƒŠ
+å…¥åŠ›ãƒ‡ãƒ¼ã‚¿ç”¨ãƒ¡ãƒ¢ãƒª
 
-# İ’èƒpƒ‰ƒ[ƒ^
+# è¨­å®šãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
 
-- \*npsv-data-num\* “ü—Íƒf[ƒ^‚Ìƒf[ƒ^”
-- \*npsv-W\* ƒf[ƒ^‘S‘Ì‚Ìƒrƒbƒg•
-- \*npsv-I\* ƒf[ƒ^‚Ì®”•”‚Ìƒrƒbƒg•
-- \*npsv-delta-T\* “®ìŠJn‚Ì’x‰„ƒNƒƒbƒN”B2ˆÈã‚ğİ’è‚·‚é‚±‚ÆB
-- \*npsv-module-name\* ƒ‚ƒWƒ…[ƒ‹–¼
-- \*npsv-init-file\* ‰Šú’lƒtƒ@ƒCƒ‹–¼B
-- \*npsv-rtl-output-dir\* rtlo—ÍƒfƒBƒŒƒNƒgƒŠi‘Š‘ÎƒpƒXj
-- \*npsv-testbench-output-dir\* ƒeƒXƒgƒxƒ“ƒ`o—ÍƒfƒBƒŒƒNƒgƒŠi‘Š‘ÎƒpƒXj
-- \*npsv-template-output-dir\* ƒeƒ“ƒvƒŒ[ƒgo—ÍƒfƒBƒŒƒNƒgƒŠi‘Š‘ÎƒpƒXj
+- \*npsv-data-num\* å…¥åŠ›ãƒ‡ãƒ¼ã‚¿ã®ãƒ‡ãƒ¼ã‚¿æ•°
+- \*npsv-W\* ãƒ‡ãƒ¼ã‚¿å…¨ä½“ã®ãƒ“ãƒƒãƒˆå¹…
+- \*npsv-I\* ãƒ‡ãƒ¼ã‚¿ã®æ•´æ•°éƒ¨ã®ãƒ“ãƒƒãƒˆå¹…
+- \*npsv-delta-T\* å‹•ä½œé–‹å§‹ã®é…å»¶ã‚¯ãƒ­ãƒƒã‚¯æ•°ã€‚2ä»¥ä¸Šã‚’è¨­å®šã™ã‚‹ã“ã¨ã€‚
+- \*npsv-module-name\* ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«å
+- \*npsv-init-file\* åˆæœŸå€¤ãƒ•ã‚¡ã‚¤ãƒ«åã€‚
+- \*npsv-rtl-output-dir\* rtlå‡ºåŠ›ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªï¼ˆç›¸å¯¾ãƒ‘ã‚¹ï¼‰
+- \*npsv-testbench-output-dir\* ãƒ†ã‚¹ãƒˆãƒ™ãƒ³ãƒå‡ºåŠ›ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªï¼ˆç›¸å¯¾ãƒ‘ã‚¹ï¼‰
+- \*npsv-template-output-dir\* ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆå‡ºåŠ›ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªï¼ˆç›¸å¯¾ãƒ‘ã‚¹ï¼‰
 
-İ’è—á
+è¨­å®šä¾‹
 ```scheme
 (define *npsv-data-num* 32)    ; data number
 (define *npsv-W* 16)   ; total word length
@@ -28,22 +28,23 @@
 ```
 
 
-# “üo—Í
+# å…¥å‡ºåŠ›
 
-|–¼‘O|ƒrƒbƒg•|•ûŒü|‹@”\|
-|clk||input|ƒNƒƒbƒN|
-|reset_x||input|ƒŠƒZƒbƒgi•‰˜_—j|
-|start||input|ˆ—ŠJnƒ^ƒCƒ~ƒ“ƒO|
-|set||input|İ’è’l‚Ì”½‰fƒ^ƒCƒ~ƒ“ƒOi–¢g—pj|
-|vo||output|valido—Í|
-|fo||output|ˆ—‚ÌI—¹’Ê’m|
-|datao|\*npsv-W\*|ƒf[ƒ^o—ÍiŒÅ’è¬”“_”j|
-|cpu_adr|\*npsv-data-num\*‚©‚çŒvZ|input|cpu‚©‚ç‚Ì‘‚«‚İƒAƒhƒŒƒX|
-|cpu_data|\*npsv-W\|input|cpu‚©‚ç‚Ì‘‚«‚İƒf[ƒ^|
-|cpu_wr||input|cpu‚©‚ç‚Ìƒ‰ƒCƒgM†|
+| åå‰ | ãƒ“ãƒƒãƒˆå¹… | æ–¹å‘ | æ©Ÿèƒ½ |
+| ------------- | -------------| ----- |---- | 
+|clk| |input|ã‚¯ãƒ­ãƒƒã‚¯|
+|reset_x||input|ãƒªã‚»ãƒƒãƒˆï¼ˆè² è«–ç†ï¼‰|
+|start||input|å‡¦ç†é–‹å§‹ã‚¿ã‚¤ãƒŸãƒ³ã‚°|
+|set||input|è¨­å®šå€¤ã®åæ˜ ã‚¿ã‚¤ãƒŸãƒ³ã‚°ï¼ˆæœªä½¿ç”¨ï¼‰|
+|vo||output|validå‡ºåŠ›|
+|fo||output|å‡¦ç†ã®çµ‚äº†é€šçŸ¥|
+|datao|\*npsv-W\*|ãƒ‡ãƒ¼ã‚¿å‡ºåŠ›ï¼ˆå›ºå®šå°æ•°ç‚¹æ•°ï¼‰|
+|cpu_adr|\*npsv-data-num\*ã‹ã‚‰è¨ˆç®—|input|cpuã‹ã‚‰ã®æ›¸ãè¾¼ã¿ã‚¢ãƒ‰ãƒ¬ã‚¹|
+|cpu_data|\*npsv-W\|input|cpuã‹ã‚‰ã®æ›¸ãè¾¼ã¿ãƒ‡ãƒ¼ã‚¿|
+|cpu_wr||input|cpuã‹ã‚‰ã®ãƒ©ã‚¤ãƒˆä¿¡å·|
 
 
-# ƒTƒ“ƒvƒ‹o—Í
+# ã‚µãƒ³ãƒ—ãƒ«å‡ºåŠ›
 
 [inmem.v](https://github.com/natsutan/nromgen/blob/master/output/rtl/sinrom.v "inmem.v")
 
