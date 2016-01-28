@@ -3,35 +3,29 @@
 (define-module npsv-const
   (export make-const-from-file))
 
-(define *inmem-parameters*
+(define *const-parameters*
   '(*npsv-module-name*
-    *npsv-data-num*
-    *npsv-init-file*
     *npsv-W*
     *npsv-I*
-    *npsv-delta-T*
+    *npsv-value*
     *npsv-rtl-output-dir*
     *npsv-testbench-output-dir*
     *npsv-template-output-dir*))
                
-(define-class <npsv-inmem> (<npsv-module>)
-  ((data-num :init-keyword :data-num)
-   (init-file :init-keyword :init-file)
-   (W :init-keyword :W)
+(define-class <npsv-const> (<npsv-module>)
+  ((W :init-keyword :W)
    (I :init-keyword :I)
-   (delta :init-keyword :delta)
+   (value :init-keyword :value)
    ))
 
 (define make-const-from-file
   (lambda (fname)
-    (clear-global-parameters! *inmem-parameters*)
+    (clear-global-parameters! *const-parameters*)
     (load-setting-file fname)
-    (let ((inst  (make-inmem-instance
+    (let ((inst  (make-const-instance
                   *npsv-module-name*
-                  *npsv-data-num*
-                  *npsv-init-file*
                   *npsv-W* *npsv-I*
-                  *npsv-delta-T*
+                  *npsv-value*
                   *npsv-rtl-output-dir*
                   *npsv-testbench-output-dir*
                   *npsv-template-output-dir*
@@ -39,21 +33,19 @@
       (make-verilog-file inst)
       inst)))
 
-(define-method print-setting ((inst <npsv-inmem>))
+(define-method print-setting ((inst <npsv-const>))
   (next-method)
-  (format #t "data number ~A~%" (ref inst 'data-num))
-  (format #t "initialize file ~A~%" (ref inst 'init-file))
   (format #t "fixed number W ~A I ~A~%" (ref inst 'W) (ref inst 'I))
-  (format #t "delta T ~A ~%" (ref inst 'delta))
+  (format #t "vaule ~A ~%" (ref inst 'value))
   (print-setting-dirs inst)
   )
 
-(define make-inmem-instance
-  (lambda (name data-num init-file W I delta rtl-odir tb-odir temp-odir)
-    (let ([inst (make <npsv-inmem> :name name :type 'npsv-inmem :comment "input memory module"
-                      :data-num data-num :init-file init-file :W W :I I :delta delta
-                      :rtl-output-dir rtl-odir :testbench-output-dir tb-odir :template-ouput-dir temp-odir)]
-          [adr_w (datanum->adr-w data-num)])
+
+(define make-const-instance
+  (lambda (name W I value rtl-odir tb-odir temp-odir)
+    (let ([inst (make <npsv-const> :name name :type 'npsv-const :comment "input const module"
+                      :W W :I I :value value
+                      :rtl-output-dir rtl-odir :testbench-output-dir tb-odir :template-ouput-dir temp-odir)])
       (add-port inst (make <npsv-port> :name "start" :dir 'input))
       (add-port inst (make <npsv-port> :name "set" :dir 'input))
       (add-port inst (make <npsv-port> :name "vo" :dir 'output :type 'reg))
@@ -67,14 +59,11 @@
                     :lsb 0
                     :fixed-info fixed
                     :type 'reg)))
-      (add-port inst (make <npsv-port> :name "cpu_adr" :dir 'input :lsb 0 :msb (- adr_w 1)))
-      (add-port inst (make <npsv-port> :name "cpu_data" :dir 'input :lsb 0 :msb (- W 1)))
-      (add-port inst (make <npsv-port> :name "cpu_wr" :dir 'input))
       inst)))
 
-(define-method make-verilog-file ((inst <npsv-inmem>))
+(define-method make-verilog-file ((inst <npsv-const>))
   (set! *npsv-module-name* (ref inst 'name))
-  (write-verilog-file inst (eval inmem-rtl-template (interaction-environment))))
+  (write-verilog-file inst (eval const-rtl-template (interaction-environment))))
 
 (define read-write-initialize-file
   (lambda (fpi fpo name W I adr)
@@ -91,7 +80,7 @@
     (write-header fp name)
     (format fp "// W = ~A, I = ~A~%" W I)))
 
-(define-method make-initialize-file ((inst <npsv-inmem>))
+(define-method make-initialize-file ((inst <npsv-const>))
   (let* ([name (ref inst 'name)]
          [initfilename (ref inst 'init-file)]
          [odir (ref inst 'testbench-output-dir)]
@@ -107,10 +96,10 @@
     (close-input-port fpi)
       ))
 
-(define-method make-verilog-testbench-file ((inst <npsv-inmem>))
-  (write-verilog-testbench-file inst (eval inmem-testbench-template (interaction-environment))))
+(define-method make-verilog-testbench-file ((inst <npsv-const>))
+  (write-verilog-testbench-file inst (eval const-testbench-template (interaction-environment))))
 
-(define-method add-top-ports (top (inst <npsv-inmem>))
+(define-method add-top-ports (top (inst <npsv-const>))
   (let ([name (ref inst 'name)]
         [W (ref inst 'W)]
         [I (ref inst 'I)]
@@ -120,23 +109,8 @@
     (add-port top (make <npsv-port> :name (inmem-cpu-wr-name name) :dir 'input))
   ))
 
-(define inmem-cpu-adr-name
-  (lambda (name)
-    (string-append name "_cpu_adr")))
-
-(define inmem-cpu-data-name
-  (lambda (name)
-    (string-append name "_cpu_data")))
-
-(define inmem-cpu-wr-name
-  (lambda (name)
-    (string-append name "_cpu_wr")))
-
-(define-method write-module-instantiation (fp (m <npsv-inmem>) channels)
+(define-method write-module-instantiation (fp (m <npsv-const>) channels)
   (let* ([name (ref m 'name)]
-         [cpu-adr-name (inmem-cpu-adr-name name)]
-         [cpu-data-name (inmem-cpu-data-name name)]
-         [cpu-wr-name (inmem-cpu-wr-name name)]
          [output-ch (find
                      (lambda (ch)
                        (eq? (ref ch 'src) m))
@@ -159,119 +133,24 @@
 ;;; --------------------------------------------------------------------------------
 ;;; verilog source
 ;;; --------------------------------------------------------------------------------
-(define inmem-rtl-template
-  '#"module ~*npsv-module-name* # (parameter DATA_WIDTH = ~*npsv-W* , DATA_NUM = ~*npsv-data-num*, DELTA_T = ~*npsv-delta-T* , ADR_WIDTH = ~(datanum->adr-w *npsv-data-num*), DELTA_WIDTH = ~(datanum->adr-w *npsv-delta-T*) )
+(define const-rtl-template
+  '#"module ~*npsv-module-name* # (parameter DATA_WIDTH = ~*npsv-W*)
 (
  input 			     clk,
  input 			     reset_x,
  input 			     start,
  input 			     set,
- output reg 		     vo,
- output reg 		     fo,
- output reg [DATA_WIDTH-1:0] datao,
+ output 		     vo,
+ output 		     fo,
+ output [DATA_WIDTH-1:0] datao,
 
- //CPU I/F
- input [ADR_WIDTH-1:0] 	     cpu_adr,
- input [DATA_WIDTH-1:0]      cpu_data,
- input 			     cpu_wr			     
-  
 );
-  reg [ADR_WIDTH-1:0] 	     adr_cnt;
-  reg [DELTA_WIDTH:0] 	     delta_cnt;
-  reg 			     delta_cnt_en;
-  reg 			     en;
-  reg [DATA_WIDTH-1:0] mem [0:DATA_NUM-1];
 
-  // CPU write
-  always @ (posedge clk or negedge reset_x) begin
-    if(cpu_wr)begin
-      mem[cpu_adr] <= cpu_data;
-    end
-  end
-
-  // mem read
-  always @ (posedge clk or negedge reset_x) begin
-    if(reset_x == 1'b0)begin
-      datao <= {DATA_WIDTH{1'b0}};
-    end else begin
-      if(adr_cnt<DATA_NUM)begin
-	datao <= mem[adr_cnt];
-      end else begin
-	datao <= 0;
-      end
-    end
-  end
-
-  //delta wait
-  always @ (posedge clk or negedge reset_x) begin
-    if(reset_x == 0)begin
-      delta_cnt_en <= 0;
-    end else begin
-      if(start)begin
-	delta_cnt_en <= 1;
-      end
-    end
-  end
+assign vo = 1;
+assign fo = 0;
+assign datao = *npsv-value*;
   
-  always @ (posedge clk or negedge reset_x) begin
-    if(reset_x == 0)begin
-      delta_cnt <= 0;
-    end else begin
-      if(delta_cnt == DELTA_T)begin
-	delta_cnt <= delta_cnt;
-      end else if(delta_cnt_en)begin
-	delta_cnt <= delta_cnt + 1;
-      end
-    end
-  end 
-
-  always @ (posedge clk or negedge reset_x) begin
-    if(reset_x == 0)begin
-      en <= 0;
-    end else begin
-      if(delta_cnt == DELTA_T-1)begin
-	en <= 1;
-      end else if(adr_cnt == DATA_NUM - 1)begin
-	en <= 0;
-      end
-    end
-  end 
-
-
-  //adr cnt
- always @ (posedge clk or negedge reset_x)begin
-    if(reset_x == 0)begin
-      adr_cnt <= 0;
-    end else begin
-      if(adr_cnt == DATA_NUM)begin
-	adr_cnt <= 0;
-      end else if(en)begin
-	adr_cnt <= adr_cnt + 1;
-      end
-    end
- end 
-  
- always @ (posedge clk or negedge reset_x) begin
-    if(reset_x == 0)begin
-      vo <= 0;
-    end else begin
-      vo <= en;
-    end
- end
-  
- always @ (posedge clk or negedge reset_x) begin
-   if(reset_x == 0)begin
-     fo <= 0;
-    end else begin
-      if(adr_cnt == DATA_NUM)begin
-	fo <= 1;
-      end else begin
-	fo <= 0;
-      end
-    end
- end 
-  
-endmodule // mem
+endmodule // const
 
   "
   )
