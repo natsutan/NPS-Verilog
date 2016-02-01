@@ -12,10 +12,8 @@
     (usage-exit (car args)))
 
   (set! *instance* (make-const-from-file (second args)))
-;  (print-setting *instance*)
-;  (make-verilog-file *instance*)
-;  (make-template *instance*)
-;  (make-initialize-file *instance*)
-;  (make-verilog-testbench-file *instance*)
+  (print-setting *instance*)
+  (make-template *instance*)
+  (make-verilog-testbench-file *instance*)
   0)
 

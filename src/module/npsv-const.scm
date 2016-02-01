@@ -1,5 +1,7 @@
 (use srfi-1)
 
+(define *inst-const* '())
+
 (define-module npsv-const
   (export make-const-from-file))
 
@@ -40,7 +42,6 @@
   (print-setting-dirs inst)
   )
 
-
 (define make-const-instance
   (lambda (name W I value rtl-odir tb-odir temp-odir)
     (let ([inst (make <npsv-const> :name name :type 'npsv-const :comment "input const module"
@@ -62,41 +63,11 @@
       inst)))
 
 (define-method make-verilog-file ((inst <npsv-const>))
-  (set! *npsv-module-name* (ref inst 'name))
+  (set! *inst-const* inst)
   (write-verilog-file inst (eval const-rtl-template (interaction-environment))))
 
-(define read-write-initialize-file
-  (lambda (fpi fpo name W I adr)
-    (let ((buf (read-line fpi)))
-      (when (not (eof-object? buf))
-        (let ((n (string->number buf)))
-          (when n              
-            (let ((s (dec->verilolg-hex-str (toFix n W I) W)))
-              (format fpo "\t~A_wr_task(~A,~A);  // ~A~%" name adr s buf)
-              (read-write-initialize-file fpi fpo name W I (+ adr 1)))))))))
-
-(define write-initialize-file-header
-  (lambda (fp name W I )
-    (write-header fp name)
-    (format fp "// W = ~A, I = ~A~%" W I)))
-
-(define-method make-initialize-file ((inst <npsv-const>))
-  (let* ([name (ref inst 'name)]
-         [initfilename (ref inst 'init-file)]
-         [odir (ref inst 'testbench-output-dir)]
-         [W (ref inst 'W)]
-         [I (ref inst 'I)]
-         [fpi (open-input-file initfilename) ]
-         [fpo (open-verilog-file odir (string-append name "_init"))])
-    (format #t "open ~A (read) ~%" initfilename)
-    (format #t "open ~A~%" (string-append name "_init"))
-    (write-initialize-file-header fpo name W I)
-    (read-write-initialize-file fpi fpo name W I 0)
-    (close-verilog-file fpo)
-    (close-input-port fpi)
-      ))
-
 (define-method make-verilog-testbench-file ((inst <npsv-const>))
+  (set! *inst-const* inst)
   (write-verilog-testbench-file inst (eval const-testbench-template (interaction-environment))))
 
 (define-method add-top-ports (top (inst <npsv-const>))
@@ -130,11 +101,20 @@
     (format fp "\t);\n");
     ))
 
+(define-method ref-W ((m <npsv-const>))
+  (let ((p (find-src-port m)))
+    (let ((fi (ref p 'fixed-info)))
+      (ref fi 'W))))
+
+(define-method ref-value ((m <npsv-const>))
+  (let ((p (find-src-port m)))
+    (toFix (ref m 'value) (ref-W p) (ref-I p))))
+
 ;;; --------------------------------------------------------------------------------
 ;;; verilog source
 ;;; --------------------------------------------------------------------------------
 (define const-rtl-template
-  '#"module ~*npsv-module-name* # (parameter DATA_WIDTH = ~*npsv-W*)
+  '#"module ~(ref-name *inst-const*) # (parameter DATA_WIDTH = ~(ref-W *inst-const*))
 (
  input 			     clk,
  input 			     reset_x,
@@ -148,20 +128,17 @@
 
 assign vo = 1;
 assign fo = 0;
-assign datao = *npsv-value*;
+assign datao = ~(ref-value *inst-const*);
   
 endmodule // const
 
   "
   )
 
-(define inmem-testbench-template
+(define const-testbench-template
   '#"
-module ~|*npsv-module-name*|_tb();
-  parameter DATA_WIDTH = ~*npsv-W*;
-  parameter DATA_NUM = ~*npsv-data-num*;
-  parameter DELTA_T = ~*npsv-delta-T*;
-  parameter ADR_WIDTH = ~(datanum->adr-w *npsv-data-num*);
+module ~(ref-name *inst-const*)_tb();
+  parameter DATA_WIDTH = ~(ref-W *inst-const*);
 
  reg 			     clk;
  reg 			     reset_x;
@@ -171,10 +148,6 @@ module ~|*npsv-module-name*|_tb();
  wire 		     fo;
  wire [DATA_WIDTH-1:0] datao;
 
- //CPU I/F
-  reg [ADR_WIDTH-1:0]  cpu_adr;
-  reg [DATA_WIDTH-1:0] cpu_data;
-  reg 		       cpu_wr;			     
 
   parameter PERIOD = 10.0;
   always # (PERIOD/2) clk = !clk;
@@ -182,7 +155,7 @@ module ~|*npsv-module-name*|_tb();
     clk = 1;
   end
   
-  ~*npsv-module-name* U0
+  ~(ref-name *inst-const*) U0
     (
      .clk(clk),
      .reset_x(reset_x),
@@ -191,33 +164,14 @@ module ~|*npsv-module-name*|_tb();
      .vo(vo),
      .fo(fo),
      .datao(datao),
-     .cpu_adr(cpu_adr),
-     .cpu_data(cpu_data),
-     .cpu_wr(cpu_wr)
      );
-
-  task ~|*npsv-module-name*|_wr_task;
-    input [ADR_WIDTH-1:0] adr;
-    input [DATA_WIDTH-1:0] data;
-    begin
-       @(posedge clk);
-       cpu_wr = 1;
-       cpu_adr = adr;
-       cpu_data = data;
-       @(posedge clk);
-       cpu_wr = 0;
-       @(posedge clk);
-    end
-  endtask
 
 
   initial begin
 
-    #1 reset_x = 1; cpu_adr = 0; cpu_wr = 0; set = 0; start = 0; cpu_data = 0;
+    #1 reset_x = 1;
     # (PERIOD * 3)  reset_x = 0;
     # (PERIOD * 5)  reset_x = 1;
-
-    `include \"~|*npsv-module-name*|_init.v\"
 
     # (PERIOD * 3) set = 1;
     # (PERIOD) set = 0;

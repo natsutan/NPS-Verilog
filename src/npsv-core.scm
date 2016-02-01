@@ -5,6 +5,9 @@
 (define-module npsv-core
   (export-all))
 
+;;; --------------------------------------------------------------------------------
+;;; npsv-fixed
+;;; --------------------------------------------------------------------------------
 (define-class <npsv-fixed> ()
   ((W :init-keyword :W) ; Whole bit width
    (I :init-keyword :I) ; Inter bit width
@@ -13,6 +16,9 @@
    (N :init-keyword :N :init-value #f)  ; reserved
    ))  
 
+;;; --------------------------------------------------------------------------------
+;;; npsv-port
+;;; --------------------------------------------------------------------------------
 (define-class <npsv-port> ()
   ((name :init-keyword :name)
    (dir :init-keyword :dir)
@@ -25,9 +31,6 @@
    (signed :init-keyword :signed :init-value #f)
    ))
 
-(define-class <npsv-fixed-port> (<npsv-port>)
-  ((fixed-info :init-keyword :fixed-info)))
-
 (define-method ref-W ((p <npsv-port>))
   (let ((fi (ref p 'fixed-info)))
     (ref fi 'W)))
@@ -37,9 +40,17 @@
     (ref fi 'I)))
 
 
+;;; npsv-fixed-port
+(define-class <npsv-fixed-port> (<npsv-port>)
+  ((fixed-info :init-keyword :fixed-info)))
+
+;;; npsv-adr-port
 (define-class <npsv-adr-port> (<npsv-port>)
   ())
 
+;;; --------------------------------------------------------------------------------
+;;; npsv-module
+;;; --------------------------------------------------------------------------------
 (define-class <npsv-module> ()
   ((name :init-keyword :name)
    (type :init-keyword :type)
@@ -50,38 +61,30 @@
    (template-ouput-dir :init-keyword :template-ouput-dir)
    ))
 
-(define-class <npsv-ch> ()
-  ((src :init-keyword :src)
-   (dst :init-keyword :dst)
-   (ch  :init-keyword :ch :init-value 0)
-   (src-port :init-value :src-port)
-   (dst-port :init-value :dst-port)
-   (data-w :init-keyword :data-w :init-value 0)
-   (data-shift :init-keyword :data-shift :init-value 0)
-   (name :init-keyword :name)))
+(define-method ref-name ((m <npsv-module>))
+  (ref m 'name))
 
-(define get-ch-src-port
-  (lambda (ch)
-    (find-src-port (ref ch 'src))))
 
+; search port
 (define-method find-src-port ((m <npsv-module>))
   (find (lambda (e)
           (string=? (ref e 'name) "datao"))
         (ref m 'ports)))
-
-(define get-ch-dst-port
-  (lambda (ch)
-    (find-dst-port (ref ch 'dst))))
 
 (define-method find-dst-port ((m <npsv-module>))
   (find (lambda (e)
           (string=? (ref e 'name) "datai"))
         (ref m 'ports)))
 
-; wireñºÇÃí≤êÆÇ…égÇ§
-(define make-ch-name
-  (lambda (src dst)
-    (string-append (ref src 'name) "")))
+
+(define get-ch-src-port
+  (lambda (ch)
+    (find-src-port (ref ch 'src))))
+
+
+(define get-ch-dst-port
+  (lambda (ch)
+    (find-dst-port (ref ch 'dst))))
 
 (define-method initialize ((self <npsv-module>) initargs)
   (next-method)
@@ -99,6 +102,24 @@
 
 (define-method print ((p <npsv-port>))
   (print (make-port-string p)))
+
+
+;;; npsv-ch
+(define-class <npsv-ch> ()
+  ((src :init-keyword :src)
+   (dst :init-keyword :dst)
+   (ch  :init-keyword :ch :init-value 0)
+   (src-port :init-value :src-port)
+   (dst-port :init-value :dst-port)
+   (data-w :init-keyword :data-w :init-value 0)
+   (data-shift :init-keyword :data-shift :init-value 0)
+   (name :init-keyword :name)))
+
+; wireñºÇÃí≤êÆÇ…égÇ§
+(define make-ch-name
+  (lambda (src dst)
+    (string-append (ref src 'name) "")))
+
 
 (define-method print ((p <npsv-fixed-port>))
   (let ((fp (ref p 'fixed-info)))
