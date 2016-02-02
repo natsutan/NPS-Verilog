@@ -122,8 +122,7 @@
  input 			     set,
  output 		     vo,
  output 		     fo,
- output [DATA_WIDTH-1:0] datao,
-
+ output [DATA_WIDTH-1:0] datao
 );
 
 assign vo = 1;
@@ -163,7 +162,7 @@ module ~(ref-name *inst-const*)_tb();
      .set(set),
      .vo(vo),
      .fo(fo),
-     .datao(datao),
+     .datao(datao)
      );
 
 
@@ -177,8 +176,6 @@ module ~(ref-name *inst-const*)_tb();
     # (PERIOD) set = 0;
     # (PERIOD * 3) start = 1;
     # (PERIOD) start = 0;
-    
-    @(posedge fo)
     
     # (PERIOD * 10)  $finish();
   end
