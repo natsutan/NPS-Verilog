@@ -167,8 +167,8 @@ module ~(ref-name *inst-const*)_tb();
 
 
   initial begin
-
-    #1 reset_x = 1;
+    $dumpvars(0, U0);
+    #1 reset_x = 1; set = 0; start = 0;
     # (PERIOD * 3)  reset_x = 0;
     # (PERIOD * 5)  reset_x = 1;
 
