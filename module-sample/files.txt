@@ -2,4 +2,6 @@ nromgen:ROMジェネレータ
 NPS-inmem:入力メモリ
 NPS-rom:rom
 NPS-outmem:出力メモリ
+NPS-to-mtx nxmの行列を作る
+NPS-mtx-mul-2-3 2x3の行列の積
 
