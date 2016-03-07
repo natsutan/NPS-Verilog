@@ -33,7 +33,7 @@
 |set||input|設定値の反映タイミング（未使用）|
 |vo||output|valid出力(1固定出力)|
 |fo||output|処理の終了通知(0固定出力)|
-|datao|\*npsv-W\*|データ出力（固定小数点数）|
+|datao|\*npsv-W\*|output|データ出力（固定小数点数）|
 
 
 
