@@ -1,14 +1,14 @@
 # NPS-const
-’è”“ü—Í
+å®šæ•°å…¥åŠ›
 
-# İ’èƒpƒ‰ƒ[ƒ^
+# è¨­å®šãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
 
-- \*npsv-W\* ƒf[ƒ^‘S‘Ì‚Ìƒrƒbƒg•
-- \*npsv-I\* ƒf[ƒ^‚Ì®”•”‚Ìƒrƒbƒg•
-- \*npsv-value\* ’è”’l
+- \*npsv-W\* ãƒ‡ãƒ¼ã‚¿å…¨ä½“ã®ãƒ“ãƒƒãƒˆå¹…
+- \*npsv-I\* ãƒ‡ãƒ¼ã‚¿ã®æ•´æ•°éƒ¨ã®ãƒ“ãƒƒãƒˆå¹…
+- \*npsv-value\* å®šæ•°å€¤
 
 
-İ’è—á
+è¨­å®šä¾‹
 ```scheme
 ; sample file
 (define *npsv-W* 4)   ; total word length
@@ -23,26 +23,17 @@
 ```
 
 
-# “üo—Í
+# å…¥å‡ºåŠ›
 
-| –¼‘O | ƒrƒbƒg• | •ûŒü | ‹@”\ |
+| åå‰ | ãƒ“ãƒƒãƒˆå¹… | æ–¹å‘ | æ©Ÿèƒ½ |
 | ------------- | -------------| ----- |---- | 
-|clk| |input|ƒNƒƒbƒN|
-|reset_x||input|ƒŠƒZƒbƒgi•‰˜_—j|
-|start||input|ˆ—ŠJnƒ^ƒCƒ~ƒ“ƒO(–¢g—p)|
-|set||input|İ’è’l‚Ì”½‰fƒ^ƒCƒ~ƒ“ƒOi–¢g—pj|
-|vo||output|valido—Í(1ŒÅ’èo—Í)|
-|fo||output|ˆ—‚ÌI—¹’Ê’m(0ŒÅ’èo—Í)|
-|datao|\*npsv-W\*|ƒf[ƒ^o—ÍiŒÅ’è¬”“_”j|
-
- input 			     clk,
- input 			     reset_x,
- input 			     start,
- input 			     set,
- output 		     vo,
- output 		     fo,
- output [DATA_WIDTH-1:0] datao
-
+|clk| |input|ã‚¯ãƒ­ãƒƒã‚¯|
+|reset_x||input|ãƒªã‚»ãƒƒãƒˆï¼ˆè² è«–ç†ï¼‰|
+|start||input|å‡¦ç†é–‹å§‹ã‚¿ã‚¤ãƒŸãƒ³ã‚°(æœªä½¿ç”¨)|
+|set||input|è¨­å®šå€¤ã®åæ˜ ã‚¿ã‚¤ãƒŸãƒ³ã‚°ï¼ˆæœªä½¿ç”¨ï¼‰|
+|vo||output|validå‡ºåŠ›(1å›ºå®šå‡ºåŠ›)|
+|fo||output|å‡¦ç†ã®çµ‚äº†é€šçŸ¥(0å›ºå®šå‡ºåŠ›)|
+|datao|\*npsv-W\*|output|ãƒ‡ãƒ¼ã‚¿å‡ºåŠ›ï¼ˆå›ºå®šå°æ•°ç‚¹æ•°ï¼‰|
 
 
 
