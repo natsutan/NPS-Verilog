@@ -73,4 +73,50 @@
            )      
       (format #f (string-append "~A'h~" (x->string dispwidth) ",,,'0@A") bit val-str))))
 
+
+;;; verilog src file util
+(define-syntax vsrc-add!
+  (syntax-rules ()
+    ((_ src str)
+     (set! src (string-append src str)))))
+
+(define vsrc-module
+  (lambda (inst)
+    (string-append "module " (ref inst 'name))))
+
+(define vsrc-port
+  (lambda (inst)
+    (let ((str "(\n") (plist (ref inst 'ports)))
+      (dolist (p plist)
+              (if (eq? p (last plist))
+                  (set! str (string-append str "\t" (make-port-string p) "\n"))
+                  (set! str (string-append str "\t" (make-port-string p) ",\n"))))
+      (set! str (string-append str ");\n"))
+      str)))
+
+
+(define vsrc-assign-and
+  (lambda (dst slist)
+    (let ((str (format #f "\tassign ~A = ~A" dst (car slist))))
+      (dolist (src (cdr slist))
+              (set! str (format #f "~A & ~A" str src)))
+      (string-append str ";\n"))))
+
+(define vsrc-assign-or
+  (lambda (dst slist)
+    (let ((str (format #f "\tassign ~A = ~A" dst (car slist))))
+      (dolist (src (cdr slist))
+              (set! str (format #f "~A | ~A" str src)))
+      (string-append str ";\n"))))
+
+
+
+(define vsrc-endmodule
+  (lambda ()
+    "endmodule\n"))
+
+
 (provide "npsv-verilog")
+
+
+
