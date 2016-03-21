@@ -16,6 +16,7 @@
    npsv-rom
    npsv-const
    npsv-to-mtx
+   npsv-dot-mtx
    npsv-portconv
    npsv-dataflow
    npsv-build-top
@@ -30,6 +31,7 @@
 (require "npsv-outmem")
 (require "npsv-rom")
 (require "npsv-to-mtx")
+(require "npsv-dot-mtx")
 (require "npsv-const")
 (require "npsv-portconv")
 (require "npsv-dataflow")

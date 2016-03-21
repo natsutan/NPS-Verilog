@@ -109,12 +109,9 @@
               (set! str (format #f "~A | ~A" str src)))
       (string-append str ";\n"))))
 
-
-
 (define vsrc-endmodule
   (lambda ()
     "endmodule\n"))
-
 
 (provide "npsv-verilog")
 
