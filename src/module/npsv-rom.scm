@@ -3,7 +3,7 @@
 
 (define *data* '())
 
-(define *outmnem-parameters*
+(define *rom-parameters*
   '(
     *npsv-data-num*
     *npsv-adr-width*
